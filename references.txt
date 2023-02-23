@@ -1,0 +1,2 @@
+Bcrypt.checkpw() - https://stackoverflow.com/questions/69175990/how-does-password-checking-in-bcrypt-work
+handline nextline after nextint - https://stackoverflow.com/questions/13102045/scanner-is-skipping-nextline-after-using-next-or-nextfoo
