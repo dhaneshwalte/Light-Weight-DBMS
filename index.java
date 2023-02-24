@@ -36,8 +36,17 @@ public class index{
         //SqlParser sqlParser = new SqlParser("Select username, usertext from user where age > 18 and time < 8");
         //SqlParser sqlParser = new SqlParser("INSERT INTO user VALUES (1,2)");
         //SqlParser sqlParser = new SqlParser("Update user set username = DAN, age = 18 where age = 11 and some=12");
-        SqlParser sqlParser = new SqlParser("DELETE FROM Customers WHERE CustomerName=\"Alfreds Barnes\" and cust=12");
-        sqlParser.parse();
+        //SqlParser sqlParser = new SqlParser("DELETE FROM Customers WHERE CustomerName=\"Alfreds Barnes\" and cust=12");
+        SqlParser sqlParser = new SqlParser("""
+            CREATE TABLE users(
+            user_id INT PRIMARY KEY,
+            username VARCHAR(40) UNIQUE,
+            password VARCHAR(255),
+            email VARCHAR(255) NOT NULL
+         );
+        """);
+        Query q = sqlParser.parse();
+        System.out.println(q);
     }
 
     public void testDbService(){

@@ -1,7 +1,13 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class CreateQuery extends Query {
     List<ColumnDefinition> columns;
+
+    
+    public CreateQuery() {
+        this.columns = new ArrayList<>();
+    }
 
     public List<ColumnDefinition> getColumnDefinitions() {
         return columns;
@@ -20,21 +26,22 @@ public class CreateQuery extends Query {
 }
 enum ColumnConstraint {
     NOT_NULL,
-    UNIQUE
+    UNIQUE,
+    PRIMARY_KEY
 }
 
 class ColumnDefinition{
     String columnName;
     String dataType;
-    List<ColumnConstraint> columnConstraints;
-    public ColumnDefinition(String columnName, String dataType, List<ColumnConstraint> columnConstraints) {
+    ColumnConstraint columnConstraint;
+    public ColumnDefinition(String columnName, String dataType, ColumnConstraint columnConstraint) {
         this.columnName = columnName;
         this.dataType = dataType;
-        this.columnConstraints = columnConstraints;
+        this.columnConstraint = columnConstraint;
     }
     @Override
     public String toString() {
-        return "ColumnDefinition [columnName=" + columnName + ", dataType=" + dataType + ", columnConstraints=" + columnConstraints.toString()
+        return "ColumnDefinition [columnName=" + columnName + ", dataType=" + dataType + ", columnConstraints=" + columnConstraint
                 + "] ";
     }
 }

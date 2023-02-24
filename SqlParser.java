@@ -49,8 +49,8 @@ public class SqlParser {
 
     public Query parseCreateTableStatement() {
         int currentTokenIndex = 0;
-        Query query = new Query();
-        query.setQueryType(QueryType.CREATE);
+        CreateQuery createQuery = new CreateQuery();
+        createQuery.setQueryType(QueryType.CREATE);
         currentTokenIndex++;
     
         // Check for "TABLE"
@@ -62,7 +62,7 @@ public class SqlParser {
     
         // Parse the table name
         String tableName = tokens[currentTokenIndex];
-        query.setTableName(tableName);
+        createQuery.setTableName(tableName);
         currentTokenIndex++; // Skip TableName
     
         // Check for "("
@@ -78,23 +78,37 @@ public class SqlParser {
             String columnName = tokens[currentTokenIndex];
             String dataType = tokens[currentTokenIndex+1];
             System.out.println(columnName + " " + dataType);
-    
-            if (!tokens[currentTokenIndex+2].equals(",")) {
-                currentTokenIndex += 2;
+            currentTokenIndex += 2;
+            
+            if (!tokens[currentTokenIndex].equals(",")
+                && !tokens[currentTokenIndex].equals(")")) {
+                System.out.println("Constraint : " + tokens[currentTokenIndex]);
                 //Constraint detected
                 if (tokens[currentTokenIndex].equalsIgnoreCase("UNIQUE")){
-                    
+                    createQuery.getColumnDefinitions().add(new ColumnDefinition(columnName, dataType, ColumnConstraint.UNIQUE));
+                    currentTokenIndex++;
                 } else if (tokens[currentTokenIndex].equalsIgnoreCase("NOT")){
-
+                    createQuery.getColumnDefinitions().add(new ColumnDefinition(columnName, dataType, ColumnConstraint.NOT_NULL));
+                    currentTokenIndex += 2; //Skip NOT NULL
                 } else if (tokens[currentTokenIndex].equalsIgnoreCase("PRIMARY")){
                     if (primaryColumnProvided){
                         throw new RuntimeException("Multiple primary columns not supported");
                     }
+                    createQuery.getColumnDefinitions().add(new ColumnDefinition(columnName, dataType, ColumnConstraint.PRIMARY_KEY));
+                    primaryColumnProvided = true;
+                    currentTokenIndex += 2; //Skip PRIMARY KEY
                 } else {
                     throw new RuntimeException("Unsupported SQL constraint type");
                 }
+            } else {
+                createQuery.getColumnDefinitions().add(new ColumnDefinition(columnName, dataType, null));
             }
-    
+            
+            if (tokens[currentTokenIndex].equals(")")) {
+                currentTokenIndex++; //Skip )
+                break;
+            }
+
             currentTokenIndex++; // Skip past ","
         }
     
@@ -103,7 +117,7 @@ public class SqlParser {
             throw new RuntimeException("Expecting ; at end of statement");
         }
 
-        return query;
+        return createQuery;
     }
     private Query parseSelectStatement() {
         int currentTokenIndex = 0;
