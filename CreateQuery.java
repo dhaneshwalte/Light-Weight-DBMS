@@ -10,6 +10,12 @@ public class CreateQuery extends Query {
     public void setColumnDefinitions (List<ColumnDefinition> columns) {
         this.columns = columns;
     }
+
+    @Override
+    public String toString() {
+        return "CreateQuery [columns=" + columns + "] " + super.toString();
+    }
+    
     
 }
 enum ColumnConstraint {
@@ -29,6 +35,6 @@ class ColumnDefinition{
     @Override
     public String toString() {
         return "ColumnDefinition [columnName=" + columnName + ", dataType=" + dataType + ", columnConstraints=" + columnConstraints.toString()
-                + "]";
+                + "] ";
     }
 }
