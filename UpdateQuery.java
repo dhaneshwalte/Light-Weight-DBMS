@@ -18,6 +18,6 @@ public class UpdateQuery extends Query{
 
     @Override
     public String toString() {
-        return "UpdateQuery [data=" + data + "]" + super.toString();
+        return "UpdateQuery [data=" + data + "] " + super.toString();
     }
 }

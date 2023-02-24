@@ -19,7 +19,7 @@ public class InsertQuery extends Query{
 
     @Override
     public String toString() {
-        return "InsertQuery [values=" + values + "]" + super.toString();
+        return "InsertQuery [values=" + values + "] " + super.toString();
     }
     
 }
