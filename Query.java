@@ -8,14 +8,10 @@ public class Query {
     List<String> columns;
     List<Condition> conditions;
     String logicalOperator;
-    List<String> values;
-    List<Map<String,Object>> data;
     
     public Query() {
         this.conditions = new ArrayList<>();
         this.columns = new ArrayList<>();
-        this.values = new ArrayList<>();
-        this.data = new ArrayList<>();
     }
 
     public QueryType getQueryType() {
@@ -48,25 +44,11 @@ public class Query {
     public void setLogicalOperator(String logicalOperator) {
         this.logicalOperator = logicalOperator;
     }
-    public List<String> getValues() {
-        return values;
-    }
-
-    public void setValues(List<String> values) {
-        this.values = values;
-    }
-    public List<Map<String, Object>> getData() {
-        return data;
-    }
-
-    public void setData(List<Map<String, Object>> data) {
-        this.data = data;
-    }
 
     @Override
     public String toString() {
         return "Query [queryType=" + queryType + ", tableName=" + tableName + ", columns=" + columns.toString() + ", conditions="
-                + conditions.toString() + ", logicalOperator=" + logicalOperator + ", values=" + values.toString() + "]";
+                + conditions.toString() + ", logicalOperator=" + logicalOperator + "]";
     }
 }
 

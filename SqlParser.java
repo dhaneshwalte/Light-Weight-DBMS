@@ -13,8 +13,11 @@ public class SqlParser {
         if (!checkValidQuotes(sql)){
             throw new RuntimeException("Invalid Double Quotes");
         }
+        sql = replaceVarcharParantheses(sql);
+        System.out.println(sql);
         // Tokenize the SQL string
         tokens = sql
+                    .trim()
                     .replaceAll("\\(", " \\( ")
                     .replaceAll("\\)", " \\) ")
                     .replaceAll(",", " , ")
@@ -22,6 +25,7 @@ public class SqlParser {
                     .split("\\s+");
         for(int i = 0; i < tokens.length; i++){
             tokens[i] = tokens[i].replaceAll("\\|", " "); //Replace pipe back with space
+            //System.out.println(tokens[i]);
         }
     }
 
@@ -36,11 +40,71 @@ public class SqlParser {
             return parseUpdateStatement();
         } else if (firstToken.equals("DELETE")) {
             return parseDeleteStatement();
+        } else if (firstToken.equals("CREATE")) {
+            return parseCreateTableStatement();
         } else {
             throw new RuntimeException("Unsupported SQL statement type");
         }
     }
 
+    public Query parseCreateTableStatement() {
+        int currentTokenIndex = 0;
+        Query query = new Query();
+        query.setQueryType(QueryType.CREATE);
+        currentTokenIndex++;
+    
+        // Check for "TABLE"
+        if (!tokens[currentTokenIndex].equalsIgnoreCase("TABLE")) {
+            throw new RuntimeException("Expecting TABLE keyword");
+        }
+    
+        currentTokenIndex++; // Skip "TABLE"
+    
+        // Parse the table name
+        String tableName = tokens[currentTokenIndex];
+        query.setTableName(tableName);
+        currentTokenIndex++; // Skip TableName
+    
+        // Check for "("
+        if (!tokens[currentTokenIndex].equals("(")) {
+            throw new RuntimeException("Expecting ( after table name");
+        }
+    
+        currentTokenIndex++;
+    
+        // Parse the column definitions
+        boolean primaryColumnProvided = false;
+        while (!tokens[currentTokenIndex].equals(")")) {
+            String columnName = tokens[currentTokenIndex];
+            String dataType = tokens[currentTokenIndex+1];
+            System.out.println(columnName + " " + dataType);
+    
+            if (!tokens[currentTokenIndex+2].equals(",")) {
+                currentTokenIndex += 2;
+                //Constraint detected
+                if (tokens[currentTokenIndex].equalsIgnoreCase("UNIQUE")){
+                    
+                } else if (tokens[currentTokenIndex].equalsIgnoreCase("NOT")){
+
+                } else if (tokens[currentTokenIndex].equalsIgnoreCase("PRIMARY")){
+                    if (primaryColumnProvided){
+                        throw new RuntimeException("Multiple primary columns not supported");
+                    }
+                } else {
+                    throw new RuntimeException("Unsupported SQL constraint type");
+                }
+            }
+    
+            currentTokenIndex++; // Skip past ","
+        }
+    
+        // Ensure the statement ends with ";"
+        if (!tokens[currentTokenIndex].equals(";")) {
+            throw new RuntimeException("Expecting ; at end of statement");
+        }
+
+        return query;
+    }
     private Query parseSelectStatement() {
         int currentTokenIndex = 0;
         System.out.println("Select statement");
@@ -76,8 +140,8 @@ public class SqlParser {
     private Query parseInsertStatement() {
         int currentTokenIndex = 0;
         currentTokenIndex++;
-        Query query = new Query();
-        query.setQueryType(QueryType.INSERT);
+        InsertQuery insertQuery = new InsertQuery();
+        insertQuery.setQueryType(QueryType.INSERT);
         // Skip past "INTO"
         if (!tokens[currentTokenIndex].equalsIgnoreCase("INTO")) {
             throw new RuntimeException("Expecting INTO keyword");
@@ -88,7 +152,7 @@ public class SqlParser {
         // Parse the table being inserted into
         String tableName = tokens[currentTokenIndex];
         currentTokenIndex++;
-        query.setTableName(tableName);
+        insertQuery.setTableName(tableName);
 
         // Parse the columns (if present)
         if (tokens[currentTokenIndex].equalsIgnoreCase("(")) {
@@ -101,7 +165,7 @@ public class SqlParser {
                 }
                 currentTokenIndex++;
             }
-            query.setColumns(columnList);
+            insertQuery.setColumns(columnList);
             currentTokenIndex++; // Skip past ")"
         }
 
@@ -123,23 +187,23 @@ public class SqlParser {
                 }
                 currentTokenIndex++;
             }
-            query.setValues(valueList);
+            insertQuery.setValues(valueList);
             currentTokenIndex++; // Skip past ")"
         }
 
-        return query;
+        return insertQuery;
     }
 
     private Query parseUpdateStatement() {
         int currentTokenIndex = 0;
         System.out.println("Update statement");
-        Query query = new Query();
-        query.setQueryType(QueryType.UPDATE);
+        UpdateQuery updateQuery = new UpdateQuery();
+        updateQuery.setQueryType(QueryType.UPDATE);
         currentTokenIndex++;
 
         // Parse the table being updated
         String tableName = tokens[currentTokenIndex];
-        query.setTableName(tableName);
+        updateQuery.setTableName(tableName);
         currentTokenIndex++;
 
         // Check for "SET"
@@ -153,7 +217,7 @@ public class SqlParser {
         while (!tokens[currentTokenIndex].equalsIgnoreCase("WHERE")) {
             String columnName = tokens[currentTokenIndex];
             String value = tokens[currentTokenIndex+2];
-            query.getData().add(new HashMap<>(Map.of(columnName, value)));
+            updateQuery.getData().add(new HashMap<>(Map.of(columnName, value)));
             System.out.println(columnName + " " + value);
             currentTokenIndex += 3;
             if (!tokens[currentTokenIndex].equalsIgnoreCase(",")) {
@@ -167,8 +231,8 @@ public class SqlParser {
             throw new RuntimeException("Expecting WHERE keyword");
         }
         
-        handleWhereCondition(currentTokenIndex, query);
-        return query;
+        handleWhereCondition(currentTokenIndex, updateQuery);
+        return updateQuery;
     }
 
     private Query parseDeleteStatement() {
@@ -234,6 +298,34 @@ public class SqlParser {
                 }
             }
         }
+    }
+
+    private String replaceVarcharParantheses(String input) {
+        int index = input.toLowerCase().indexOf("varchar");
+        while (index >= 0) { //varchar found
+            int start = input.indexOf("(", index);
+            //index+6 is 'r' +7 or +8 should be '('
+            if (start - (index+6) > 2){
+                throw new RuntimeException("Varchar syntax error");
+            }
+            if (start >= 0) { //opening brace for varchar
+                // // Remove any spaces between "varchar" and the opening parenthesis
+                // int spaceIndex = input.lastIndexOf(" ", start - 1);
+                // if (spaceIndex >= index) {
+                //     input = input.substring(0, spaceIndex) + input.substring(spaceIndex + 1);
+                //     start--;
+                // }
+                int end = input.indexOf(")", start);
+                if (end >= 0) {
+                    input = input.substring(0, start) + "[" + input.substring(start + 1, end) + "]" + input.substring(end + 1);
+                }
+                else { // corresponding ) not found
+                    throw new RuntimeException("Varchar syntax error");
+                }
+            }
+            index = input.toLowerCase().indexOf("varchar", index + 1);
+        }
+        return input;
     }
 
     private String replaceSpacesBetweenQuotes(String input) {
