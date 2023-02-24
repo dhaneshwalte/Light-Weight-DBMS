@@ -3,7 +3,7 @@ import java.util.List;
 
 public class Query {
     QueryType queryType;
-    String table;
+    String tableName;
     List<String> columns;
     List<Condition> conditions;
     String logicalOperator;
@@ -21,11 +21,11 @@ public class Query {
     public void setQueryType(QueryType queryType) {
         this.queryType = queryType;
     }
-    public String getTable() {
-        return table;
+    public String getTableName() {
+        return tableName;
     }
-    public void setTable(String table) {
-        this.table = table;
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
     public List<String> getColumns() {
         return columns;
@@ -45,7 +45,6 @@ public class Query {
     public void setLogicalOperator(String logicalOperator) {
         this.logicalOperator = logicalOperator;
     }
-    
     public List<String> getValues() {
         return values;
     }
@@ -56,7 +55,7 @@ public class Query {
 
     @Override
     public String toString() {
-        return "Query [queryType=" + queryType + ", table=" + table + ", columns=" + columns.toString() + ", conditions="
+        return "Query [queryType=" + queryType + ", tableName=" + tableName + ", columns=" + columns.toString() + ", conditions="
                 + conditions.toString() + ", logicalOperator=" + logicalOperator + ", values=" + values.toString() + "]";
     }
 }

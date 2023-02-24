@@ -64,7 +64,7 @@ public class SqlParser {
 
         // Parse the table being queried
         String tableName = tokens[currentTokenIndex];
-        query.setTable(tableName);
+        query.setTableName(tableName);
         currentTokenIndex++;
 
         handleWhereCondition(currentTokenIndex, query);
@@ -86,7 +86,7 @@ public class SqlParser {
         // Parse the table being inserted into
         String tableName = tokens[currentTokenIndex];
         currentTokenIndex++;
-        query.setTable(tableName);
+        query.setTableName(tableName);
 
         // Parse the columns (if present)
         if (tokens[currentTokenIndex].equalsIgnoreCase("(")) {
@@ -137,7 +137,7 @@ public class SqlParser {
 
         // Parse the table being updated
         String tableName = tokens[currentTokenIndex];
-        query.setTable(tableName);
+        query.setTableName(tableName);
         currentTokenIndex++;
 
         // Check for "SET"
@@ -186,7 +186,7 @@ public class SqlParser {
 
         // Parse the table to delete from
         String tableName = tokens[currentTokenIndex];
-        query.setTable(tableName);
+        query.setTableName(tableName);
         currentTokenIndex++;
 
         // Check for "WHERE"
