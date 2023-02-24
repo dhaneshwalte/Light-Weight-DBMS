@@ -3,8 +3,7 @@ import java.util.*;
 
 public class index{
     public static void main(String[] args) throws IOException {
-        Scanner scanner = new Scanner(System.in);
-        
+        Scanner scanner = new Scanner(System.in);        
         AuthService authService = new AuthService();
         System.out.println("1. Login\n2. Register");
         int choice = Integer.parseInt(scanner.nextLine());
@@ -31,6 +30,14 @@ public class index{
             }
         }
         scanner.close();
+    }
+
+    public void testSqlParser(){
+        //SqlParser sqlParser = new SqlParser("Select username, usertext from user where age > 18 and time < 8");
+        //SqlParser sqlParser = new SqlParser("INSERT INTO user VALUES (1,2)");
+        //SqlParser sqlParser = new SqlParser("Update user set username = DAN, age = 18 where age = 11 and some=12");
+        SqlParser sqlParser = new SqlParser("DELETE FROM Customers WHERE CustomerName=\"Alfreds Barnes\" and cust=12");
+        sqlParser.parse();
     }
 
     public void testDbService(){
