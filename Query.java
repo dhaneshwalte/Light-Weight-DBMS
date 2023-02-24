@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Query {
     QueryType queryType;
@@ -8,11 +9,13 @@ public class Query {
     List<Condition> conditions;
     String logicalOperator;
     List<String> values;
+    List<Map<String,Object>> data;
     
     public Query() {
         this.conditions = new ArrayList<>();
         this.columns = new ArrayList<>();
         this.values = new ArrayList<>();
+        this.data = new ArrayList<>();
     }
 
     public QueryType getQueryType() {
@@ -51,6 +54,13 @@ public class Query {
 
     public void setValues(List<String> values) {
         this.values = values;
+    }
+    public List<Map<String, Object>> getData() {
+        return data;
+    }
+
+    public void setData(List<Map<String, Object>> data) {
+        this.data = data;
     }
 
     @Override

@@ -1,5 +1,7 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SqlParser {
 
@@ -151,8 +153,7 @@ public class SqlParser {
         while (!tokens[currentTokenIndex].equalsIgnoreCase("WHERE")) {
             String columnName = tokens[currentTokenIndex];
             String value = tokens[currentTokenIndex+2];
-            query.getColumns().add(columnName);
-            query.getValues().add(value);
+            query.getData().add(new HashMap<>(Map.of(columnName, value)));
             System.out.println(columnName + " " + value);
             currentTokenIndex += 3;
             if (!tokens[currentTokenIndex].equalsIgnoreCase(",")) {
