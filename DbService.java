@@ -46,8 +46,51 @@ public class DbService {
 
     public void insert(String tableName, LinkedHashMap<String, Object> row) {
         Table table = tables.get(tableName);
+        //row.forEach((k,v) -> System.out.println(k + " " + v));
+        if (!checkIntegrityConstraints(table, row)){
+            throw new RuntimeException("Integrity Contraints failed");
+        }
         table.values.add(row);
         saveTable(tableName);
+    }
+
+    public boolean checkIntegrityConstraints(Table table, LinkedHashMap<String, Object> row){
+        for(Map.Entry<String, Object> entry: row.entrySet()){
+            for(Column column: table.columns){
+                if (column.columnName.equals(entry.getKey())){
+                    if (column.columnConstraint == ColumnConstraint.UNIQUE){
+                        if (!checkUniqueConstraint(table, entry)){
+                            System.out.println("UNIQUE CONSTRAINT VIOLATION");
+                            return false;
+                        }
+                    }
+                    else if (column.columnConstraint == ColumnConstraint.NOT_NULL
+                    && entry.getValue() == null){
+                        System.out.println("NOT NULL CONSTRAINT VIOLATION: " + entry.getKey());
+                        return false;
+                    }
+                    else if (column.columnConstraint == ColumnConstraint.PRIMARY_KEY){
+                        if (entry.getValue() == null || !checkUniqueConstraint(table, entry)){
+                            System.out.println("PRIMARY KEY CONSTRAINT VIOLATION");
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean checkUniqueConstraint(Table table, Map.Entry<String, Object> entry){
+        String insertKey = entry.getKey();
+        String insertValue = entry.getValue().toString();
+        for(LinkedHashMap<String, Object> tableRow: table.values){
+            if (tableRow.get(insertKey).toString().equals(insertValue)){
+                System.out.println("Duplicate value for UNIQUE constraint "+ insertKey + " : "+ insertValue);
+                return false;
+            }
+        }
+        return true;
     }
 
     public void update(String tableName,  Map<String,Object> updateData, 

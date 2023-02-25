@@ -72,9 +72,34 @@ public class QueryEngine {
         }
     }
     private boolean verifyDataTypes(List<Column> columns, Map<String, Object> row) {
+        for(Map.Entry<String, Object> entry: row.entrySet()){
+            //Skip if the value is null
+            if (entry.getValue() == null) continue;
+            for(Column column: columns){
+                if (column.columnName.equals(entry.getKey())){
+                    if (column.dataType.toLowerCase().startsWith("varchar")){
+                        int openBraceIndex = column.dataType.toLowerCase().indexOf("[");
+                        int closeBraceIndex = column.dataType.toLowerCase().indexOf("]");
+                        int varcharLength = Integer.parseInt(column.dataType.substring(openBraceIndex+1, closeBraceIndex));
+                        //System.out.println(varcharLength);
+                        if (entry.getValue().toString().length() > varcharLength){
+                            System.out.println("Length exceeds");
+                            return false;
+                        }
+                    }
+                    else {
+                        try{
+                            Integer.parseInt(entry.getValue().toString());
+                            return true;
+                        }
+                        catch(NumberFormatException e){
+                            System.out.println("Invalid value for INT");
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
         return true;
     }
-    private void filterWhereCondition(Table table, List<Condition> conditions) {
-        Condition firsCondition = conditions.get(0);
-    }   
 }
