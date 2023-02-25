@@ -122,8 +122,8 @@ public class SqlParser {
     private Query parseSelectStatement() {
         int currentTokenIndex = 0;
         System.out.println("Select statement");
-        Query query = new Query();
-        query.setQueryType(QueryType.SELECT);
+        SelectQuery selectQuery = new SelectQuery();
+        selectQuery.setQueryType(QueryType.SELECT);
         currentTokenIndex++;
 
         List<String> columnList = new ArrayList<>();
@@ -135,20 +135,20 @@ public class SqlParser {
             }
             currentTokenIndex++;
         }
-        query.setColumnNames(columnList);
+        selectQuery.setColumnNames(columnList);
         if (columnList.size() == 1 && columnList.get(0).equals("*")){
-            query.setColumnNames(null);
+            selectQuery.setColumnNames(null);
         }
 
         currentTokenIndex++; // Skip past "FROM"
 
         // Parse the table being queried
         String tableName = tokens[currentTokenIndex];
-        query.setTableName(tableName);
+        selectQuery.setTableName(tableName);
         currentTokenIndex++;
 
-        handleWhereCondition(currentTokenIndex, query);
-        return query;
+        handleWhereCondition(currentTokenIndex, selectQuery);
+        return selectQuery;
     }
 
     private Query parseInsertStatement() {
@@ -252,8 +252,8 @@ public class SqlParser {
     private Query parseDeleteStatement() {
         int currentTokenIndex = 0;
         System.out.println("Delete statement");
-        Query query = new Query();
-        query.setQueryType(QueryType.DELETE);
+        DeleteQuery deleteQuery = new DeleteQuery();
+        deleteQuery.setQueryType(QueryType.DELETE);
         currentTokenIndex++;
 
         // Check for "FROM"
@@ -265,7 +265,7 @@ public class SqlParser {
 
         // Parse the table to delete from
         String tableName = tokens[currentTokenIndex];
-        query.setTableName(tableName);
+        deleteQuery.setTableName(tableName);
         currentTokenIndex++;
 
         // Check for "WHERE"
@@ -273,8 +273,8 @@ public class SqlParser {
             throw new RuntimeException("Expecting WHERE keyword");
         }
 
-        handleWhereCondition(currentTokenIndex, query);
-        return query;
+        handleWhereCondition(currentTokenIndex, deleteQuery);
+        return deleteQuery;
     }
 
     private void handleWhereCondition(int currentTokenIndex, Query query) {
