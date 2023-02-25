@@ -206,7 +206,6 @@ public class SqlParser {
 
     private Query parseUpdateStatement() {
         int currentTokenIndex = 0;
-        System.out.println("Update statement");
         UpdateQuery updateQuery = new UpdateQuery();
         updateQuery.setQueryType(QueryType.UPDATE);
         currentTokenIndex++;
@@ -228,7 +227,6 @@ public class SqlParser {
             String columnName = tokens[currentTokenIndex];
             String value = tokens[currentTokenIndex+2];
             updateQuery.getData().put(columnName, value);
-            System.out.println(columnName + " " + value);
             currentTokenIndex += 3;
             if (currentTokenIndex < tokens.length && !tokens[currentTokenIndex].equalsIgnoreCase(",")) {
                 break;
