@@ -54,7 +54,7 @@ public class DbService {
         saveTable(tableName);
     }
 
-    public boolean checkIntegrityConstraints(Table table, LinkedHashMap<String, Object> row){
+    public boolean checkIntegrityConstraints(Table table, Map<String, Object> row){
         for(Map.Entry<String, Object> entry: row.entrySet()){
             for(Column column: table.columns){
                 if (column.columnName.equals(entry.getKey())){
@@ -105,7 +105,10 @@ public class DbService {
             if(sastisfyConditions(row, conditions, logicalOperator)){
                 for(Map.Entry<String, Object> entry: updateData.entrySet()){
                     if (table.values.get(i).containsKey(entry.getKey())){
-                        table.values.get(i).put(entry.getKey(), entry.getValue());
+                        LinkedHashMap<String, Object> temp = table.values.get(i);
+                        if (checkIntegrityConstraints(table, updateData)){
+                            table.values.get(i).put(entry.getKey(), entry.getValue());
+                        }
                     }else{
                         System.out.println("Update attribute: " + entry.getKey() + " Not found");
                     }

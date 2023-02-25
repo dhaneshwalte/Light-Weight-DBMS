@@ -81,11 +81,14 @@ public class QueryEngine {
             }
         } else if (query.queryType == QueryType.UPDATE){
             UpdateQuery updateQuery = (UpdateQuery) query;
-            //TODO: Verify data types in the set and integrity
-            dbService.update(updateQuery.getTableName(), 
-                             updateQuery.getData(), 
-                             updateQuery.getConditions(), 
-                             updateQuery.getLogicalOperator());
+            Table table = dbService.getTable(updateQuery.getTableName());
+            if (verifyDataTypes(table.getColumns(), updateQuery.getData())){
+                dbService.update(updateQuery.getTableName(), 
+                                 updateQuery.getData(), 
+                                 updateQuery.getConditions(), 
+                                 updateQuery.getLogicalOperator());
+            }
+            
         } else if (query.queryType == QueryType.DELETE){
             DeleteQuery deleteQuery = (DeleteQuery) query;
             System.out.println(deleteQuery);
