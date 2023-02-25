@@ -10,9 +10,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
-
-import org.apache.commons.collections.iterators.EntrySetMapIterator;
 
 public class DbService {
     String dataDirectory = "database/dbname/";
@@ -105,7 +102,6 @@ public class DbService {
             if(sastisfyConditions(row, conditions, logicalOperator)){
                 for(Map.Entry<String, Object> entry: updateData.entrySet()){
                     if (table.values.get(i).containsKey(entry.getKey())){
-                        LinkedHashMap<String, Object> temp = table.values.get(i);
                         if (checkIntegrityConstraints(table, updateData)){
                             table.values.get(i).put(entry.getKey(), entry.getValue());
                         }
