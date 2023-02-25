@@ -7,31 +7,49 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class DbService {
     String dataDirectory = "database/dbname/";
-    private Map<String, Table> tables;
+    private Map<String, Table> tables; // Make this single instance only
 
     public DbService() {
         tables = new HashMap<>();
     }
 
-    public void createTable(String tableName, List<String> columns) {
-        tables.put(tableName, new Table(columns, new ArrayList<>()));
-        saveTable(tableName);
+    public Table getTable(String tableName) {
+        Table table = null;
+        if (tables.containsKey(tableName)){
+            table = tables.get(tableName);
+        } else {
+            table = loadTable(tableName);
+        }
+        if (table != null){
+            tables.put(tableName, table);
+        }
+        return table;
     }
 
-    public void insert(String tableName, Map<String, Object> row) {
+    public void createTable(String tableName, List<Column> columns) {
+        if (tables.containsKey(tableName)){
+            throw new RuntimeException("Table Already Exists");
+        }
+        tables.put(tableName, new Table(columns, new ArrayList<>()));
+        saveTable(tableName);
+        saveMeta(tableName, columns);
+    }
+
+    public void insert(String tableName, LinkedHashMap<String, Object> row) {
         Table table = tables.get(tableName);
         table.values.add(row);
         saveTable(tableName);
     }
 
-    public Table select(String tableName, List<String> columns) {
+    public Table select(String tableName, List<Column> columns) {
         if (!tables.containsKey(tableName)){
-            Table table = load(tableName);
+            Table table = loadTable(tableName);
             if (table == null){
                 //TODO: make custom exception
                 System.out.println("Table DNE");
@@ -43,11 +61,11 @@ public class DbService {
         if (columns == null){
             return tables.get(tableName);
         }
-        List<Map<String, Object>> result = new ArrayList<>();
-        for (Map<String, Object> row : table.values) {
-            Map<String, Object> selectedRow = new HashMap<>();
-            for (String column : columns) {
-                selectedRow.put(column, row.get(column));
+        List<LinkedHashMap<String, Object>> result = new ArrayList<>();
+        for (LinkedHashMap<String, Object> row : table.values) {
+            LinkedHashMap<String, Object> selectedRow = new LinkedHashMap<>();
+            for (Column column : columns) {
+                selectedRow.put(column.columnName, row.get(column.columnName));
             }
             result.add(selectedRow);
         }
@@ -67,6 +85,31 @@ public class DbService {
         saveTable(tableName);
     }
 
+    public void saveMeta(String tableName, List<Column> columns) {
+        String metaPath = dataDirectory + tableName + ".meta";
+        File metaFile = new File(metaPath);
+        if (!metaFile.exists()){
+            //TODO: Create exception
+            System.out.println("File DNE");
+            try {
+                metaFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try (PrintWriter writer = new PrintWriter(new FileWriter(metaPath))) {
+            for (Column column : columns) { 
+                List<String> values = new ArrayList<>(Arrays.asList(column.columnName, 
+                                                                    column.dataType, 
+                                                                    column.columnConstraint == null ? "NONE" : column.columnConstraint.toString()));
+                String line = String.join(",", values);
+                writer.println(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void saveTable(String tableName) {
         String tablePath = dataDirectory + tableName + ".csv";
         File tableFile = new File(tablePath);
@@ -81,12 +124,14 @@ public class DbService {
         }
         try (PrintWriter writer = new PrintWriter(new FileWriter(tablePath))) {
             Table table = tables.get(tableName);
-            String header = String.join(",", table.columns);
+            List<String> columnNames = new ArrayList<>();
+            table.columns.forEach(column -> columnNames.add(column.columnName));
+            String header = String.join(",", columnNames);
             writer.println(header);
             for (Map<String, Object> row : table.values) {
                 List<String> values = new ArrayList<>();
                 for (Object value : row.values()) {
-                    values.add(value.toString());
+                    values.add(handleNull(value));
                 }
                 String line = String.join(",", values);
                 writer.println(line);
@@ -96,27 +141,57 @@ public class DbService {
         }
     }
 
-    public Table load(String file) {
-        String tablePath = dataDirectory + file + ".csv";
+    private String handleNull(Object object) {
+        return object == null ? " " : object.toString();
+    }
+
+    public List<Column> loadMeta(String tableName) {
+        String metaPath = dataDirectory + tableName + ".meta";
+        File metaFile = new File(metaPath);
+        if (!metaFile.exists()){
+            System.out.println("Meta does not exist");
+            return null;
+        }
+        List<Column> metaList = new ArrayList<>();
+        FileReader reader = null;
+        BufferedReader bufferedReader = null;
+        try {
+            reader = new FileReader(metaPath);
+            bufferedReader = new BufferedReader(reader);
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                String[] values = line.split(",");
+                ColumnConstraint columnConstraint = parseColumnConstraint(values[2]);
+                metaList.add(new Column(values[0], values[1], columnConstraint));
+            }
+            bufferedReader.close();
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();   
+            return null;
+        }
+        return metaList;
+    }
+
+    public Table loadTable(String tableName) {
+        String tablePath = dataDirectory + tableName + ".csv";
         File tableFile = new File(tablePath);
         if (!tableFile.exists()){
             System.out.println("Table does not exist");
             return null;
         }
-        List<Map<String, Object>> rows = new ArrayList<>();
-        List<String> headersList = null;
+        List<LinkedHashMap<String, Object>> rows = new ArrayList<>();
         FileReader reader = null;
         BufferedReader bufferedReader = null;
         try {
             reader = new FileReader(tablePath);
             bufferedReader = new BufferedReader(reader);
             String[] headers = bufferedReader.readLine().split(",");
-            headersList = Arrays.asList(headers);
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 String[] values = line.split(",");
                 int totalColumns = values.length;
-                Map<String, Object> row = new HashMap<>();
+                LinkedHashMap<String, Object> row = new LinkedHashMap<>();
                 for (int i = 0; i < totalColumns; i++) {
                     String column = headers[i];
                     String value = values[i];
@@ -130,6 +205,19 @@ public class DbService {
             e.printStackTrace();   
             return null;
         }
-        return new Table(headersList, rows);
+        List<Column> metaList = loadMeta(tableName);
+        return new Table(metaList, rows);
+    }
+
+    private ColumnConstraint parseColumnConstraint(String columnConstraintString){
+        if (columnConstraintString.equals("UNIQUE")){
+            return ColumnConstraint.UNIQUE;
+        } else if (columnConstraintString.equals("NOT_NULL")){
+            return ColumnConstraint.NOT_NULL;
+        } else if (columnConstraintString.equals("NONE")){
+            return null;
+        } else {
+            return ColumnConstraint.PRIMARY_KEY;
+        }
     }
 }
