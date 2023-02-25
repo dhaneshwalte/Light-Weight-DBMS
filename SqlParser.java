@@ -121,7 +121,6 @@ public class SqlParser {
     }
     private Query parseSelectStatement() {
         int currentTokenIndex = 0;
-        System.out.println("Select statement");
         SelectQuery selectQuery = new SelectQuery();
         selectQuery.setQueryType(QueryType.SELECT);
         currentTokenIndex++;
@@ -131,13 +130,12 @@ public class SqlParser {
             String[] columnNames = tokens[currentTokenIndex].split(",");
             for (String columnName : columnNames) {
                 columnList.add(columnName);
-                System.out.println("Selected column: " + columnName);
             }
             currentTokenIndex++;
         }
         selectQuery.setColumnNames(columnList);
         if (columnList.size() == 1 && columnList.get(0).equals("*")){
-            selectQuery.setColumnNames(null);
+            selectQuery.setColumnNames(new ArrayList<>());
         }
 
         currentTokenIndex++; // Skip past "FROM"

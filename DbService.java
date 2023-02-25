@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class DbService {
     String dataDirectory = "database/dbname/";
@@ -47,7 +48,8 @@ public class DbService {
         saveTable(tableName);
     }
 
-    public Table select(String tableName, List<Column> columns) {
+    public Table select(String tableName, List<String> columnNames, 
+                        List<Condition> conditions, String logicalOperator) {
         if (!tables.containsKey(tableName)){
             Table table = loadTable(tableName);
             if (table == null){
@@ -58,22 +60,76 @@ public class DbService {
             tables.put(tableName, table);
         }
         Table table = tables.get(tableName);
-        if (columns == null){
-            return tables.get(tableName);
+        if (columnNames.isEmpty()){
+            columnNames = table.getColumnNames();
         }
+        //System.out.println();
         List<LinkedHashMap<String, Object>> result = new ArrayList<>();
         for (LinkedHashMap<String, Object> row : table.values) {
-            LinkedHashMap<String, Object> selectedRow = new LinkedHashMap<>();
-            for (Column column : columns) {
-                selectedRow.put(column.columnName, row.get(column.columnName));
+            if(sastisfyConditions(row, conditions, logicalOperator)){
+                LinkedHashMap<String, Object> selectedRow = new LinkedHashMap<>();
+                for (String columnName : columnNames) {
+                    selectedRow.put(columnName, row.get(columnName));
+                }
+                result.add(selectedRow);
             }
-            result.add(selectedRow);
         }
-        return new Table(columns, result);
+        return new Table(null, result);
+    }
+
+    private boolean sastisfyConditions(LinkedHashMap<String, Object> row, 
+                            List<Condition> conditions, String logicalOperator) {
+        
+        if (conditions.isEmpty()) return true;
+        List<Boolean> conditionResults = new ArrayList<>();
+        for(Condition condition : conditions){
+            String conditionKey = condition.leftOperand;
+            String conditionValue = condition.rightOperand;
+            if (!row.containsKey(conditionKey)){
+                throw new RuntimeException("Where clause key: "+ conditionKey + " Not found");
+            }
+            String rowValue = (String) row.get(conditionKey);
+            conditionResults.add(testCondition(conditionKey, conditionValue, rowValue, condition.operator));
+        }
+        if (logicalOperator == null){
+            return conditionResults.get(0);
+        } else if (logicalOperator.equalsIgnoreCase("OR")){
+            return (conditionResults.get(0) || conditionResults.get(1));
+        } else if (logicalOperator.equalsIgnoreCase("AND")){
+            return (conditionResults.get(0) && conditionResults.get(1));
+        }
+        return true;
+    }
+
+    private boolean testCondition(String conditionKey, String conditionValue, 
+                                  String rowValue, String operator) {
+        
+        if (operator.equals("=") || operator.equals("==")){
+            if (rowValue.equals(conditionValue)) return true;
+            else return false;
+        }
+        if (operator.equals("!=")){
+            if (!rowValue.equals(conditionValue)) return true;
+            else return false;
+        }
+        int rowIntValue = Integer.parseInt(rowValue);
+        int conditionIntValue = Integer.parseInt(conditionValue);
+        switch(operator){
+            case ">":
+                if (rowIntValue > conditionIntValue) return true;
+            case "<":
+                if (rowIntValue < conditionIntValue) return true;
+            case ">=":
+                if (rowIntValue >= conditionIntValue) return true;
+            case "<=":
+                if (rowIntValue <= conditionIntValue) return true;
+            default:
+                return false;
+        }
     }
 
     public void delete(String tableName, Map<String, Object> conditions) {
-        Table table = select(tableName, null);
+        Table table = select(tableName, null, null, null);
         table.values.removeIf(row -> {
             for (Map.Entry<String, Object> entry : conditions.entrySet()) {
                 if (!entry.getValue().equals(row.get(entry.getKey()))) {

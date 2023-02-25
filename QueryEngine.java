@@ -11,11 +11,17 @@ public class QueryEngine {
     public void executeQuery(String Sql){
         SqlParser sqlParser = new SqlParser(Sql);
         Query query = sqlParser.parse();
-        System.out.println(query);
         if (query.getQueryType() == QueryType.CREATE){
             CreateQuery createQuery = (CreateQuery) query;
             dbService.createTable(createQuery.getTableName(), createQuery.getColumns());
         } else if (query.getQueryType() == QueryType.SELECT){
+            SelectQuery selectQuery = (SelectQuery) query;
+            //TODO: Check valid operators for the conditions
+            Table result = dbService.select(selectQuery.getTableName(), 
+                                            selectQuery.getColumnNames(), 
+                                            selectQuery.getConditions(),
+                                            selectQuery.getLogicalOperator());
+            result.values.forEach(row -> row.forEach((k,v) -> System.out.println(v)));
             //Table table = dbService.select(query.getTableName(), query.getColumns());
             //filterWhereCondition(table, query.getConditions());
         } else if (query.getQueryType() == QueryType.INSERT){
@@ -49,6 +55,9 @@ public class QueryEngine {
             } else {
                 System.out.println("Data Type Mismatch");
             }
+        } else if (query.queryType == QueryType.UPDATE){
+            UpdateQuery updateQuery = (UpdateQuery) query;
+            
         }
     }
     private boolean verifyDataTypes(List<Column> columns, Map<String, Object> row) {

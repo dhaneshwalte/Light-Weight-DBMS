@@ -34,7 +34,7 @@ public class index{
     }
 
     public static void testSqlParser(){
-        //SqlParser sqlParser = new SqlParser("Select username, usertext from user where age > 18 and time < 8");
+        String selectString = "Select * from users where user_id = 2 and email = dan2@dan.dan";
         //SqlParser sqlParser = new SqlParser("INSERT INTO user VALUES (1,2)");
         //SqlParser sqlParser = new SqlParser("Update user set username = DAN, age = 18 where age = 11 and some=12");
         //SqlParser sqlParser = new SqlParser("DELETE FROM Customers WHERE CustomerName=\"Alfreds Barnes\" and cust=12");
@@ -49,7 +49,7 @@ public class index{
          );
         """;
         QueryEngine queryEngine = new QueryEngine();
-        queryEngine.executeQuery(insertColumnQueryString);
+        queryEngine.executeQuery(selectString);
     }
 
     public void testDbService(){
@@ -66,14 +66,14 @@ public class index{
         LinkedHashMap<String, Object> user2 = new LinkedHashMap<>(Map.of("user1", "dan", "user2", 26));
         dbService.insert("user2", user1);
         dbService.insert("user2", user2);
-        userTable = dbService.select("user2", null);
+        userTable = dbService.select("user2", null, null, null);
         for (Map<String, Object> row: userTable.values){
             row.forEach((key, value) -> System.out.println(key + ":" + value));
         }
         System.out.println("deleting");
         Map<String, Object> remove = new HashMap<>(Map.of("user2", 25));
         dbService.delete("user2", remove);
-        userTable = dbService.select("user2", null);
+        userTable = dbService.select("user2", null, null, null);
         System.out.println(userTable.values.size());
         for (Map<String, Object> row: userTable.values){
             row.forEach((key, value) -> System.out.println(key + ":" + value));
