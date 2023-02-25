@@ -57,7 +57,11 @@ public class QueryEngine {
             }
         } else if (query.queryType == QueryType.UPDATE){
             UpdateQuery updateQuery = (UpdateQuery) query;
-            
+            //TODO: Verify data types in the set and integrity
+            dbService.update(updateQuery.getTableName(), 
+                             updateQuery.getData(), 
+                             updateQuery.getConditions(), 
+                             updateQuery.getLogicalOperator());
         }
     }
     private boolean verifyDataTypes(List<Column> columns, Map<String, Object> row) {

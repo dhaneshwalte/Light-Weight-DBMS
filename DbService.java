@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import org.apache.commons.collections.iterators.EntrySetMapIterator;
+
 public class DbService {
     String dataDirectory = "database/dbname/";
     private Map<String, Table> tables; // Make this single instance only
@@ -48,18 +50,36 @@ public class DbService {
         saveTable(tableName);
     }
 
+    public void update(String tableName,  Map<String,Object> updateData, 
+    List<Condition> conditions, String logicalOperator ){
+        Table table = getTable(tableName);    
+        if (table == null){
+            System.out.println("Table not found");
+            return;
+        }
+        for(int i = 0; i < table.values.size(); i++){
+            LinkedHashMap<String, Object> row = table.values.get(i);
+            if(sastisfyConditions(row, conditions, logicalOperator)){
+                for(Map.Entry<String, Object> entry: updateData.entrySet()){
+                    if (table.values.get(i).containsKey(entry.getKey())){
+                        table.values.get(i).put(entry.getKey(), entry.getValue());
+                    }else{
+                        System.out.println("Update attribute: " + entry.getKey() + " Not found");
+                    }
+                }
+            }
+        }
+        saveTable(tableName);
+    }
+
     public Table select(String tableName, List<String> columnNames, 
                         List<Condition> conditions, String logicalOperator) {
-        if (!tables.containsKey(tableName)){
-            Table table = loadTable(tableName);
-            if (table == null){
-                //TODO: make custom exception
-                System.out.println("Table DNE");
-                return null;
-            }
-            tables.put(tableName, table);
+
+        Table table = getTable(tableName);    
+        if (table == null){
+            System.out.println("Table not found");
+            return null;
         }
-        Table table = tables.get(tableName);
         if (columnNames.isEmpty()){
             columnNames = table.getColumnNames();
         }

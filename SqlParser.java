@@ -226,24 +226,21 @@ public class SqlParser {
         currentTokenIndex++;
 
         // Parse the new values for the columns
-        while (!tokens[currentTokenIndex].equalsIgnoreCase("WHERE")) {
+        while (currentTokenIndex < tokens.length && !tokens[currentTokenIndex].equalsIgnoreCase("WHERE")) {
             String columnName = tokens[currentTokenIndex];
             String value = tokens[currentTokenIndex+2];
-            updateQuery.getData().add(new HashMap<>(Map.of(columnName, value)));
+            updateQuery.getData().put(columnName, value);
             System.out.println(columnName + " " + value);
             currentTokenIndex += 3;
-            if (!tokens[currentTokenIndex].equalsIgnoreCase(",")) {
+            if (currentTokenIndex < tokens.length && !tokens[currentTokenIndex].equalsIgnoreCase(",")) {
                 break;
             }
             currentTokenIndex++;
         }
-
         // Check for "WHERE"
-        if (!tokens[currentTokenIndex].equalsIgnoreCase("WHERE")) {
-            throw new RuntimeException("Expecting WHERE keyword");
+        if (currentTokenIndex < tokens.length && tokens[currentTokenIndex].equalsIgnoreCase("WHERE")) {
+            handleWhereCondition(currentTokenIndex, updateQuery);
         }
-        
-        handleWhereCondition(currentTokenIndex, updateQuery);
         return updateQuery;
     }
 

@@ -1,18 +1,19 @@
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class UpdateQuery extends Query{
-    List<Map<String,Object>> data;
+    Map<String,Object> data;
 
     public UpdateQuery() {
-        this.data = new ArrayList<>();
+        this.data = new LinkedHashMap<>();
     }
-    public List<Map<String, Object>> getData() {
+    public Map<String,Object> getData() {
         return data;
     }
 
-    public void setData(List<Map<String, Object>> data) {
+    public void setData(Map<String,Object> data) {
         this.data = data;
     }
 
