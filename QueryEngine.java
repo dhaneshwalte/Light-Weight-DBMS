@@ -3,6 +3,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class QueryEngine {
     DbService dbService;
     QueryEngine(){
@@ -21,7 +22,30 @@ public class QueryEngine {
                                             selectQuery.getColumnNames(), 
                                             selectQuery.getConditions(),
                                             selectQuery.getLogicalOperator());
-            result.values.forEach(row -> row.forEach((k,v) -> System.out.println(v)));
+            
+            StringBuilder seperator = new StringBuilder("-");
+            for(int i = 0; i < 16*result.getColumnNames().size(); i++) seperator.append("-");
+            System.out.println(seperator);
+            int index = 0;
+            for(String columnName: result.getColumnNames()){
+                if (index == 0) System.out.print("|");
+                String paddedColumn = String.format("%-15s", columnName);
+                System.out.print(paddedColumn+"|");
+                index++;
+            }
+            System.out.println();
+            System.out.println(seperator);
+            for(Map<String, Object> row: result.values){
+                index=0;
+                for(Map.Entry<String, Object> entry: row.entrySet()){
+                    if (index == 0) System.out.print("|");
+                    String paddedValue = String.format("%-15s", entry.getValue());
+                    System.out.print(paddedValue+"|");
+                    index++;
+                }
+                System.out.println();
+            }
+            System.out.println(seperator);
             //Table table = dbService.select(query.getTableName(), query.getColumns());
             //filterWhereCondition(table, query.getConditions());
         } else if (query.getQueryType() == QueryType.INSERT){

@@ -34,7 +34,7 @@ public class index{
     }
 
     public static void testSqlParser(){
-        String selectString = "Select * from users where user_id = 2 and email = dan2@dan.dan";
+        String selectString = "Select * from users";
         String updateString = "Update users set username = DAN2 where email = dan3@dan.dan and user_id = 2";
         String deleteString = "DELETE FROM users WHERE username=dan2 and email=dan3@dan.dan";
         String insertQueryString = "INSERT INTO users VALUES (dan,dan,1234,dan@dan.dan)";
@@ -49,7 +49,7 @@ public class index{
          );
         """;
         QueryEngine queryEngine = new QueryEngine();
-        queryEngine.executeQuery(insertColumnQueryString);
+        queryEngine.executeQuery(selectString);
         //queryEngine.executeQuery(insertQueryString2);
         //queryEngine.executeQuery(deleteString);
     }

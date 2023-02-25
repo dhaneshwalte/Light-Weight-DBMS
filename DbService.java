@@ -137,7 +137,15 @@ public class DbService {
                 result.add(selectedRow);
             }
         }
-        return new Table(null, result);
+        List<Column> resultColumns = new ArrayList<>();
+        for(Column column: table.columns){
+            for(String columnName: columnNames){
+                if(columnName.equals(column.columnName)){
+                    resultColumns.add(column);
+                }
+            }
+        }
+        return new Table(resultColumns, result);
     }
 
     private boolean sastisfyConditions(LinkedHashMap<String, Object> row, 
