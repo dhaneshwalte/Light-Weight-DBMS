@@ -85,23 +85,23 @@ public class SqlParser {
                 System.out.println("Constraint : " + tokens[currentTokenIndex]);
                 //Constraint detected
                 if (tokens[currentTokenIndex].equalsIgnoreCase("UNIQUE")){
-                    createQuery.getColumnDefinitions().add(new ColumnDefinition(columnName, dataType, ColumnConstraint.UNIQUE));
+                    createQuery.getColumns().add(new Column(columnName, dataType, ColumnConstraint.UNIQUE));
                     currentTokenIndex++;
                 } else if (tokens[currentTokenIndex].equalsIgnoreCase("NOT")){
-                    createQuery.getColumnDefinitions().add(new ColumnDefinition(columnName, dataType, ColumnConstraint.NOT_NULL));
+                    createQuery.getColumns().add(new Column(columnName, dataType, ColumnConstraint.NOT_NULL));
                     currentTokenIndex += 2; //Skip NOT NULL
                 } else if (tokens[currentTokenIndex].equalsIgnoreCase("PRIMARY")){
                     if (primaryColumnProvided){
                         throw new RuntimeException("Multiple primary columns not supported");
                     }
-                    createQuery.getColumnDefinitions().add(new ColumnDefinition(columnName, dataType, ColumnConstraint.PRIMARY_KEY));
+                    createQuery.getColumns().add(new Column(columnName, dataType, ColumnConstraint.PRIMARY_KEY));
                     primaryColumnProvided = true;
                     currentTokenIndex += 2; //Skip PRIMARY KEY
                 } else {
                     throw new RuntimeException("Unsupported SQL constraint type");
                 }
             } else {
-                createQuery.getColumnDefinitions().add(new ColumnDefinition(columnName, dataType, null));
+                createQuery.getColumns().add(new Column(columnName, dataType, null));
             }
             
             if (tokens[currentTokenIndex].equals(")")) {
@@ -135,9 +135,9 @@ public class SqlParser {
             }
             currentTokenIndex++;
         }
-        query.setColumns(columnList);
+        query.setColumnNames(columnList);
         if (columnList.size() == 1 && columnList.get(0).equals("*")){
-            query.setColumns(null);
+            query.setColumnNames(null);
         }
 
         currentTokenIndex++; // Skip past "FROM"
@@ -179,7 +179,7 @@ public class SqlParser {
                 }
                 currentTokenIndex++;
             }
-            insertQuery.setColumns(columnList);
+            insertQuery.setColumnNames(columnList);
             currentTokenIndex++; // Skip past ")"
         }
 

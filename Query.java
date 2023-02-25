@@ -5,13 +5,13 @@ import java.util.Map;
 public class Query {
     QueryType queryType;
     String tableName;
-    List<String> columns;
+    List<String> columnNames;
     List<Condition> conditions;
     String logicalOperator;
     
     public Query() {
         this.conditions = new ArrayList<>();
-        this.columns = new ArrayList<>();
+        this.columnNames = new ArrayList<>();
     }
 
     public QueryType getQueryType() {
@@ -26,11 +26,11 @@ public class Query {
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
-    public List<String> getColumns() {
-        return columns;
+    public List<String> getColumnNames() {
+        return columnNames;
     }
-    public void setColumns(List<String> columns) {
-        this.columns = columns;
+    public void setColumnNames(List<String> columnNames) {
+        this.columnNames = columnNames;
     }
     public List<Condition> getConditions() {
         return conditions;
@@ -47,7 +47,7 @@ public class Query {
 
     @Override
     public String toString() {
-        return "Query [queryType=" + queryType + ", tableName=" + tableName + ", columns=" + columns.toString() + ", conditions="
+        return "Query [queryType=" + queryType + ", tableName=" + tableName + ", columnNames=" + columnNames.toString() + ", conditions="
                 + conditions.toString() + ", logicalOperator=" + logicalOperator + "]";
     }
 }
