@@ -35,10 +35,10 @@ public class index{
 
     public static void testSqlParser(){
         String selectString = "Select * from users where user_id = 2 and email = dan2@dan.dan";
-        //SqlParser sqlParser = new SqlParser("INSERT INTO user VALUES (1,2)");
         String updateString = "Update users set username = DAN2 where email = dan3@dan.dan and user_id = 2";
-        //SqlParser sqlParser = new SqlParser("DELETE FROM Customers WHERE CustomerName=\"Alfreds Barnes\" and cust=12");
+        String deleteString = "DELETE FROM users WHERE username=dan2 and email=dan3@dan.dan";
         String insertQueryString = "INSERT INTO users VALUES (1,dan,1234,dan@dan.dan)";
+        String insertQueryString2 = "INSERT INTO users VALUES (1,dan2,1234,dan@dan.dan)";
         String insertColumnQueryString = "INSERT INTO users(user_id, email) VALUES (1,dan@dan.dan)";
         String createQueryString = """
             CREATE TABLE users(
@@ -49,7 +49,9 @@ public class index{
          );
         """;
         QueryEngine queryEngine = new QueryEngine();
-        queryEngine.executeQuery(updateString);
+        //queryEngine.executeQuery(insertQueryString);
+        //queryEngine.executeQuery(insertQueryString2);
+        queryEngine.executeQuery(deleteString);
     }
 
     public void testDbService(){
@@ -72,7 +74,7 @@ public class index{
         }
         System.out.println("deleting");
         Map<String, Object> remove = new HashMap<>(Map.of("user2", 25));
-        dbService.delete("user2", remove);
+        dbService.delete("user2", null, null);
         userTable = dbService.select("user2", null, null, null);
         System.out.println(userTable.values.size());
         for (Map<String, Object> row: userTable.values){

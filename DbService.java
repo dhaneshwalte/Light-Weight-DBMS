@@ -148,15 +148,17 @@ public class DbService {
         }
     }
 
-    public void delete(String tableName, Map<String, Object> conditions) {
-        Table table = select(tableName, null, null, null);
+    public void delete(String tableName, List<Condition> conditions, String logicalOperator) {
+        Table table = getTable(tableName);    
+        if (table == null){
+            System.out.println("Table not found");
+            return;
+        }
         table.values.removeIf(row -> {
-            for (Map.Entry<String, Object> entry : conditions.entrySet()) {
-                if (!entry.getValue().equals(row.get(entry.getKey()))) {
-                    return false;
-                }
+            if(sastisfyConditions(row, conditions, logicalOperator)){
+                return true;
             }
-            return true;
+            return false;
         });
         saveTable(tableName);
     }

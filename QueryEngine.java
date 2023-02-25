@@ -62,6 +62,13 @@ public class QueryEngine {
                              updateQuery.getData(), 
                              updateQuery.getConditions(), 
                              updateQuery.getLogicalOperator());
+        } else if (query.queryType == QueryType.DELETE){
+            DeleteQuery deleteQuery = (DeleteQuery) query;
+            System.out.println(deleteQuery);
+            //TODO: Verify data types in the set and integrity
+            dbService.delete(deleteQuery.getTableName(),
+                             deleteQuery.getConditions(), 
+                             deleteQuery.getLogicalOperator());
         }
     }
     private boolean verifyDataTypes(List<Column> columns, Map<String, Object> row) {
