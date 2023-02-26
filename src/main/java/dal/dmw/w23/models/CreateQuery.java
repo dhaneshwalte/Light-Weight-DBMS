@@ -1,3 +1,4 @@
+package dal.dmw.w23.models;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,9 +24,4 @@ public class CreateQuery extends Query {
     }
     
     
-}
-enum ColumnConstraint {
-    NOT_NULL,
-    UNIQUE,
-    PRIMARY_KEY
 }

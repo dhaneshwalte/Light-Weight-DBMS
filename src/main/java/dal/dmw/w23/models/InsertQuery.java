@@ -1,3 +1,4 @@
+package dal.dmw.w23.models;
 import java.util.ArrayList;
 import java.util.List;
 

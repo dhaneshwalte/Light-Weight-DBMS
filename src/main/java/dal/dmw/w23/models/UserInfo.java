@@ -1,3 +1,4 @@
+package dal.dmw.w23.models;
 public class UserInfo {
     private String username;
     private String hashedPassword;

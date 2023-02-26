@@ -1,6 +1,17 @@
+package dal.dmw.w23;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import dal.dmw.w23.models.Column;
+import dal.dmw.w23.models.CreateQuery;
+import dal.dmw.w23.models.DeleteQuery;
+import dal.dmw.w23.models.InsertQuery;
+import dal.dmw.w23.models.Query;
+import dal.dmw.w23.models.QueryType;
+import dal.dmw.w23.models.SelectQuery;
+import dal.dmw.w23.models.Table;
+import dal.dmw.w23.models.UpdateQuery;
 
 
 public class QueryEngine {
@@ -34,7 +45,7 @@ public class QueryEngine {
             }
             System.out.println();
             System.out.println(seperator);
-            for(Map<String, Object> row: result.values){
+            for(Map<String, Object> row: result.getValues()){
                 index=0;
                 for(Map.Entry<String, Object> entry: row.entrySet()){
                     if (index == 0) System.out.print("|");
@@ -78,9 +89,12 @@ public class QueryEngine {
             } else {
                 System.out.println("Data Type Mismatch");
             }
-        } else if (query.queryType == QueryType.UPDATE){
+        } else if (query.getQueryType() == QueryType.UPDATE){
             UpdateQuery updateQuery = (UpdateQuery) query;
             Table table = dbService.getTable(updateQuery.getTableName());
+            if (table == null){
+                throw new RuntimeException("Table does not exist");
+            }
             if (verifyDataTypes(table.getColumns(), updateQuery.getData())){
                 dbService.update(updateQuery.getTableName(), 
                                  updateQuery.getData(), 
@@ -88,7 +102,7 @@ public class QueryEngine {
                                  updateQuery.getLogicalOperator());
             }
             
-        } else if (query.queryType == QueryType.DELETE){
+        } else if (query.getQueryType() == QueryType.DELETE){
             DeleteQuery deleteQuery = (DeleteQuery) query;
             System.out.println(deleteQuery);
             //TODO: Verify data types in the set and integrity
@@ -102,11 +116,11 @@ public class QueryEngine {
             //Skip if the value is null
             if (entry.getValue() == null) continue;
             for(Column column: columns){
-                if (column.columnName.equals(entry.getKey())){
-                    if (column.dataType.toLowerCase().startsWith("varchar")){
-                        int openBraceIndex = column.dataType.toLowerCase().indexOf("[");
-                        int closeBraceIndex = column.dataType.toLowerCase().indexOf("]");
-                        int varcharLength = Integer.parseInt(column.dataType.substring(openBraceIndex+1, closeBraceIndex));
+                if (column.getColumnName().equals(entry.getKey())){
+                    if (column.getDataType().toLowerCase().startsWith("varchar")){
+                        int openBraceIndex = column.getDataType().toLowerCase().indexOf("[");
+                        int closeBraceIndex = column.getDataType().toLowerCase().indexOf("]");
+                        int varcharLength = Integer.parseInt(column.getDataType().substring(openBraceIndex+1, closeBraceIndex));
                         //System.out.println(varcharLength);
                         if (entry.getValue().toString().length() > varcharLength){
                             System.out.println("Length exceeds");

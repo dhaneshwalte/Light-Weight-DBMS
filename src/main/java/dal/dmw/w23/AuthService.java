@@ -1,3 +1,4 @@
+package dal.dmw.w23;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -7,6 +8,8 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
+
+import dal.dmw.w23.models.UserInfo;
 
 public class AuthService {
     private String authFilePath = "meta/auth.csv";

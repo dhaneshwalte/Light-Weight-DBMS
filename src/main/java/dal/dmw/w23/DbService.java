@@ -1,3 +1,4 @@
+package dal.dmw.w23;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -10,6 +11,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import dal.dmw.w23.models.Column;
+import dal.dmw.w23.models.ColumnConstraint;
+import dal.dmw.w23.models.Condition;
+import dal.dmw.w23.models.Table;
 
 public class DbService {
     String dataDirectory = "database/dbname/";
@@ -47,26 +53,28 @@ public class DbService {
         if (!checkIntegrityConstraints(table, row)){
             throw new RuntimeException("Integrity Contraints failed");
         }
-        table.values.add(row);
+        List<LinkedHashMap<String, Object>> values = table.getValues();
+        values.add(row);
+        table.setValues(values);
         saveTable(tableName);
     }
 
     public boolean checkIntegrityConstraints(Table table, Map<String, Object> row){
         for(Map.Entry<String, Object> entry: row.entrySet()){
-            for(Column column: table.columns){
-                if (column.columnName.equals(entry.getKey())){
-                    if (column.columnConstraint == ColumnConstraint.UNIQUE){
+            for(Column column: table.getColumns()){
+                if (column.getColumnName().equals(entry.getKey())){
+                    if (column.getColumnConstraint() == ColumnConstraint.UNIQUE){
                         if (!checkUniqueConstraint(table, entry)){
                             System.out.println("UNIQUE CONSTRAINT VIOLATION");
                             return false;
                         }
                     }
-                    else if (column.columnConstraint == ColumnConstraint.NOT_NULL
+                    else if (column.getColumnConstraint() == ColumnConstraint.NOT_NULL
                     && entry.getValue() == null){
                         System.out.println("NOT NULL CONSTRAINT VIOLATION: " + entry.getKey());
                         return false;
                     }
-                    else if (column.columnConstraint == ColumnConstraint.PRIMARY_KEY){
+                    else if (column.getColumnConstraint() == ColumnConstraint.PRIMARY_KEY){
                         if (entry.getValue() == null || !checkUniqueConstraint(table, entry)){
                             System.out.println("PRIMARY KEY CONSTRAINT VIOLATION");
                             return false;
@@ -81,7 +89,7 @@ public class DbService {
     public boolean checkUniqueConstraint(Table table, Map.Entry<String, Object> entry){
         String insertKey = entry.getKey();
         String insertValue = entry.getValue().toString();
-        for(LinkedHashMap<String, Object> tableRow: table.values){
+        for(LinkedHashMap<String, Object> tableRow: table.getValues()){
             if (tableRow.get(insertKey).toString().equals(insertValue)){
                 System.out.println("Duplicate value for UNIQUE constraint "+ insertKey + " : "+ insertValue);
                 return false;
@@ -97,13 +105,14 @@ public class DbService {
             System.out.println("Table not found");
             return;
         }
-        for(int i = 0; i < table.values.size(); i++){
-            LinkedHashMap<String, Object> row = table.values.get(i);
+        for(int i = 0; i < table.getValues().size(); i++){
+            LinkedHashMap<String, Object> row = table.getValues().get(i);
             if(sastisfyConditions(row, conditions, logicalOperator)){
                 for(Map.Entry<String, Object> entry: updateData.entrySet()){
-                    if (table.values.get(i).containsKey(entry.getKey())){
+                    if (table.getValues().get(i).containsKey(entry.getKey())){
                         if (checkIntegrityConstraints(table, updateData)){
-                            table.values.get(i).put(entry.getKey(), entry.getValue());
+                            LinkedHashMap<String, Object> value = table.getValues().get(i);
+                            value.put(entry.getKey(), entry.getValue());
                         }
                     }else{
                         System.out.println("Update attribute: " + entry.getKey() + " Not found");
@@ -127,7 +136,7 @@ public class DbService {
         }
         //System.out.println();
         List<LinkedHashMap<String, Object>> result = new ArrayList<>();
-        for (LinkedHashMap<String, Object> row : table.values) {
+        for (LinkedHashMap<String, Object> row : table.getValues()) {
             if(sastisfyConditions(row, conditions, logicalOperator)){
                 LinkedHashMap<String, Object> selectedRow = new LinkedHashMap<>();
                 for (String columnName : columnNames) {
@@ -137,9 +146,9 @@ public class DbService {
             }
         }
         List<Column> resultColumns = new ArrayList<>();
-        for(Column column: table.columns){
+        for(Column column: table.getColumns()){
             for(String columnName: columnNames){
-                if(columnName.equals(column.columnName)){
+                if(columnName.equals(column.getColumnName())){
                     resultColumns.add(column);
                 }
             }
@@ -153,13 +162,13 @@ public class DbService {
         if (conditions.isEmpty()) return true;
         List<Boolean> conditionResults = new ArrayList<>();
         for(Condition condition : conditions){
-            String conditionKey = condition.leftOperand;
-            String conditionValue = condition.rightOperand;
+            String conditionKey = condition.getLeftOperand();
+            String conditionValue = condition.getRightOperand();
             if (!row.containsKey(conditionKey)){
                 throw new RuntimeException("Where clause key: "+ conditionKey + " Not found");
             }
             String rowValue = (String) row.get(conditionKey);
-            conditionResults.add(testCondition(conditionKey, conditionValue, rowValue, condition.operator));
+            conditionResults.add(testCondition(conditionKey, conditionValue, rowValue, condition.getOperator()));
         }
         if (logicalOperator == null){
             return conditionResults.get(0);
@@ -204,12 +213,14 @@ public class DbService {
             System.out.println("Table not found");
             return;
         }
-        table.values.removeIf(row -> {
+        List<LinkedHashMap<String, Object>> values = table.getValues();
+        values.removeIf(row -> {
             if(sastisfyConditions(row, conditions, logicalOperator)){
                 return true;
             }
             return false;
         });
+        table.setValues(values);
         saveTable(tableName);
     }
 
@@ -227,9 +238,9 @@ public class DbService {
         }
         try (PrintWriter writer = new PrintWriter(new FileWriter(metaPath))) {
             for (Column column : columns) { 
-                List<String> values = new ArrayList<>(Arrays.asList(column.columnName, 
-                                                                    column.dataType, 
-                                                                    column.columnConstraint == null ? "NONE" : column.columnConstraint.toString()));
+                List<String> values = new ArrayList<>(Arrays.asList(column.getColumnName(), 
+                                                                    column.getDataType(), 
+                                                                    column.getColumnConstraint() == null ? "NONE" : column.getColumnConstraint().toString()));
                 String line = String.join(",", values);
                 writer.println(line);
             }
@@ -253,10 +264,10 @@ public class DbService {
         try (PrintWriter writer = new PrintWriter(new FileWriter(tablePath))) {
             Table table = tables.get(tableName);
             List<String> columnNames = new ArrayList<>();
-            table.columns.forEach(column -> columnNames.add(column.columnName));
+            table.getColumns().forEach(column -> columnNames.add(column.getColumnName()));
             String header = String.join(",", columnNames);
             writer.println(header);
-            for (Map<String, Object> row : table.values) {
+            for (Map<String, Object> row : table.getValues()) {
                 List<String> values = new ArrayList<>();
                 for (Object value : row.values()) {
                     values.add(handleNull(value));

@@ -1,3 +1,4 @@
+package dal.dmw.w23.models;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,21 +32,5 @@ public class Table {
 
     public void setValues(List<LinkedHashMap<String, Object>> values) {
         this.values = values;
-    }
-}
-
-class Column{
-    String columnName;
-    String dataType;
-    ColumnConstraint columnConstraint;
-    public Column(String columnName, String dataType, ColumnConstraint columnConstraint) {
-        this.columnName = columnName;
-        this.dataType = dataType;
-        this.columnConstraint = columnConstraint;
-    }
-    @Override
-    public String toString() {
-        return "ColumnDefinition [columnName=" + columnName + ", dataType=" + dataType + ", columnConstraints=" + columnConstraint
-                + "] ";
     }
 }

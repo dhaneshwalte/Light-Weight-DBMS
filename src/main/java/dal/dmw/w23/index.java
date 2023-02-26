@@ -1,5 +1,9 @@
+package dal.dmw.w23;
 import java.io.IOException;
 import java.util.*;
+
+import dal.dmw.w23.models.Column;
+import dal.dmw.w23.models.Table;
 
 public class index{
     public static void main(String[] args) throws IOException {

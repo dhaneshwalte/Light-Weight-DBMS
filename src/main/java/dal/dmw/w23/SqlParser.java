@@ -1,5 +1,17 @@
+package dal.dmw.w23;
 import java.util.ArrayList;
 import java.util.List;
+
+import dal.dmw.w23.models.Column;
+import dal.dmw.w23.models.ColumnConstraint;
+import dal.dmw.w23.models.Condition;
+import dal.dmw.w23.models.CreateQuery;
+import dal.dmw.w23.models.DeleteQuery;
+import dal.dmw.w23.models.InsertQuery;
+import dal.dmw.w23.models.Query;
+import dal.dmw.w23.models.QueryType;
+import dal.dmw.w23.models.SelectQuery;
+import dal.dmw.w23.models.UpdateQuery;
 
 public class SqlParser {
 
@@ -75,12 +87,10 @@ public class SqlParser {
         while (!tokens[currentTokenIndex].equals(")")) {
             String columnName = tokens[currentTokenIndex];
             String dataType = tokens[currentTokenIndex+1];
-            System.out.println(columnName + " " + dataType);
             currentTokenIndex += 2;
             
             if (!tokens[currentTokenIndex].equals(",")
                 && !tokens[currentTokenIndex].equals(")")) {
-                System.out.println("Constraint : " + tokens[currentTokenIndex]);
                 //Constraint detected
                 if (tokens[currentTokenIndex].equalsIgnoreCase("UNIQUE")){
                     createQuery.getColumns().add(new Column(columnName, dataType, ColumnConstraint.UNIQUE));

@@ -1,3 +1,4 @@
+package dal.dmw.w23.models;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,29 +50,4 @@ public class Query {
         return "Query [queryType=" + queryType + ", tableName=" + tableName + ", columnNames=" + columnNames.toString() + ", conditions="
                 + conditions.toString() + ", logicalOperator=" + logicalOperator + "]";
     }
-}
-
-enum QueryType {
-    CREATE,
-    SELECT,
-    UPDATE,
-    DELETE,
-    INSERT
-}
-
-class Condition{
-    String leftOperand;
-    String rightOperand;
-    String operator;
-    public Condition(String leftOperand, String rightOperand, String operator) {
-        this.leftOperand = leftOperand;
-        this.rightOperand = rightOperand;
-        this.operator = operator;
-    }
-    @Override
-    public String toString() {
-        return "Condition [leftOperand=" + leftOperand + ", rightOperand=" + rightOperand + ", operator=" + operator
-                + "]";
-    }
-    
 }

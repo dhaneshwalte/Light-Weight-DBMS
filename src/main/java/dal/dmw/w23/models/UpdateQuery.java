@@ -1,3 +1,4 @@
+package dal.dmw.w23.models;
 import java.util.LinkedHashMap;
 import java.util.Map;
 

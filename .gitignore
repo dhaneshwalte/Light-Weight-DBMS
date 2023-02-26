@@ -2,3 +2,5 @@ dependencies/
 .vscode
 meta/auth.csv
 database
+.idea
+P2.iml
