@@ -17,7 +17,7 @@ import dal.dmw.w23.models.UpdateQuery;
 public class QueryEngine {
     DbService dbService;
     QueryEngine(){
-        dbService = new DbService();
+        dbService = new DbService("dbname");
     }
     public void executeQuery(String Sql){
         SqlParser sqlParser = new SqlParser(Sql);
