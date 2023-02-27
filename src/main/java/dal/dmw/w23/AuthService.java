@@ -11,8 +11,18 @@ import java.security.NoSuchAlgorithmException;
 import dal.dmw.w23.models.UserInfo;
 
 //Reference - https://howtodoinjava.com/java/java-security/how-to-generate-secure-password-hash-md5-sha-pbkdf2-bcrypt-examples/
+/**
+ * This is a service class that handles 
+ * login and registration of the user
+ */
 public class AuthService {
+    /**
+     * Path for auth file where user credentials are stored
+     */
     private String authFilePath = "meta/auth.txt";
+    /**
+     * messageDigest for calculating hash value of user password
+     */
     MessageDigest messageDigest = null;
     AuthService(){
         try{
@@ -22,6 +32,12 @@ public class AuthService {
             System.out.println("Invalid Hashing Algorithm");
         }
     }
+    /**
+     * This method checks if the user inputted username and password matches.
+     * @param username - input username
+     * @param password - input password
+     * @return - returns true if credentials are valid, false if not.
+     */
     public boolean authenticate(String username, String password) {
         UserInfo userInfo = getUserInfoFromFile(username);
 
@@ -41,43 +57,13 @@ public class AuthService {
         }
     }
 
+    /**
+     * This method registers a new user in the database
+     * @param username - input username
+     * @param password - input password
+     * @return - returns true if user registration is successful.
+     */
 
-    private UserInfo getUserInfoFromFile(String username){
-        File authFile = new File(authFilePath);
-        if (!authFile.exists()){
-            return null;
-        }
-        UserInfo userInfo = null;
-        FileReader reader = null;
-        BufferedReader bufferedReader = null;
-        try {
-            reader = new FileReader(this.authFilePath);
-            bufferedReader = new BufferedReader(reader);
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                String[] values = line.split(",");
-                if (values[0].equals(username)) {
-                    userInfo = new UserInfo(values[0], values[1]);
-                    break;
-                }
-            }
-            bufferedReader.close();
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return userInfo;
-    }
-
-    public String getHashedPassword(String password){
-        messageDigest.update(password.getBytes());
-        byte[] bytes = messageDigest.digest();
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < bytes.length; i++) {
-            stringBuilder.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
-        }
-        return stringBuilder.toString();
-    }
     public boolean register(String username, String password){
         UserInfo userinfo = getUserInfoFromFile(username);
         if (userinfo != null){
@@ -112,5 +98,52 @@ public class AuthService {
             return false;
         }
         return true;
+    }
+
+    /**
+     * This is a utility method fetches the user object using the specified username
+     * @param username - username of the user
+     * @return - return the object of UserInfo class if the mentioned user exists.
+     */
+    private UserInfo getUserInfoFromFile(String username){
+        File authFile = new File(authFilePath);
+        if (!authFile.exists()){
+            return null;
+        }
+        UserInfo userInfo = null;
+        FileReader reader = null;
+        BufferedReader bufferedReader = null;
+        try {
+            reader = new FileReader(this.authFilePath);
+            bufferedReader = new BufferedReader(reader);
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                String[] values = line.split(",");
+                if (values[0].equals(username)) {
+                    userInfo = new UserInfo(values[0], values[1]);
+                    break;
+                }
+            }
+            bufferedReader.close();
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return userInfo;
+    }
+
+    /**
+     * This is a utility method that calculates md5 hash for the given password
+     * @param password - input password
+     * @return - returns the hash of the input password.
+     */
+    public String getHashedPassword(String password){
+        messageDigest.update(password.getBytes());
+        byte[] bytes = messageDigest.digest();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < bytes.length; i++) {
+            stringBuilder.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+        }
+        return stringBuilder.toString();
     }
 }
