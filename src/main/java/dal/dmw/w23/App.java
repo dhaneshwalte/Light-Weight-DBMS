@@ -2,6 +2,13 @@ package dal.dmw.w23;
 
 public class App {
     public static void main( String[] args ){
+        AuthService authService = new AuthService();
+        String username = "root";
+        String password = "password";
+        if (!authService.authenticate(username, password)){
+            System.out.println("Invalid Credentials");
+            return;
+        }
         String selectString = "Select * from users";
         String updateString = "Update users set user_id = 5, username=Mavy2 where user_id = 3";
         String deleteString = "DELETE FROM users WHERE username=dan and email=dan@dan.dan";
