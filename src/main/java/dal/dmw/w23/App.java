@@ -3,7 +3,7 @@ package dal.dmw.w23;
 public class App {
     public static void main( String[] args ){
         String selectString = "Select * from users";
-        String updateString = "Update users set user_id = 4, username=Mavy where user_id = 2";
+        String updateString = "Update users set user_id = 3, username=Mavy where user_id = 4";
         String deleteString = "DELETE FROM users WHERE username=dan and email=dan@dan.dan";
         String insertQueryString = "INSERT INTO users VALUES (dan,dan,1234,dan@dan.dan)";
         String insertQueryString2 = "INSERT INTO users VALUES (2,dan2,1234,dan@dan.dan)";
@@ -17,7 +17,7 @@ public class App {
          );
         """;
         QueryEngine queryEngine = new QueryEngine();
-        queryEngine.executeQuery(selectString);
+        queryEngine.executeQuery(updateString);
         //queryEngine.executeQuery(insertQueryString2);
         //queryEngine.executeQuery(deleteString);
     }

@@ -109,13 +109,15 @@ public class DbService {
             LinkedHashMap<String, Object> row = table.getValues().get(i);
             if(sastisfyConditions(row, conditions, logicalOperator)){
                 for(Map.Entry<String, Object> entry: updateData.entrySet()){
-                    if (table.getValues().get(i).containsKey(entry.getKey())){
-                        if (checkIntegrityConstraints(table, updateData)){
+                    if (!table.getValues().get(i).containsKey(entry.getKey())){
+                        System.out.println("Update attribute: " + entry.getKey() + " Not found");
+                        return;
+                    }
+                }
+                if (checkIntegrityConstraints(table, updateData)){
+                    for(Map.Entry<String, Object> entry: updateData.entrySet()){
                             LinkedHashMap<String, Object> value = table.getValues().get(i);
                             value.put(entry.getKey(), entry.getValue());
-                        }
-                    }else{
-                        System.out.println("Update attribute: " + entry.getKey() + " Not found");
                     }
                 }
             }
