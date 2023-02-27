@@ -17,14 +17,33 @@ import dal.dmw.w23.models.ColumnConstraint;
 import dal.dmw.w23.models.Condition;
 import dal.dmw.w23.models.Table;
 
+/**
+ * This is a service class which represents the DB APIs
+ * APIs are for the following queries - 
+ * CREATE, SELECT, INSERT, UPDATE, DELETE
+ */
 public class DbService {
-    String dataDirectory = "database/dbname/";
-    private Map<String, Table> tables; // Make this single instance only
+    /**
+     * This is the relative path to the tables in the specified database.
+     */
+    private String dataDirectory;
+    /**
+     * This is the in memory table data structure that will be in sync with the physical file
+     */
+    private Map<String, Table> tables;
 
-    public DbService() {
+    public DbService(String dbName) {
+        this.dataDirectory = "database/" + dbName + "/";
         tables = new HashMap<>();
     }
-
+    
+    /**
+     * This method returns the mentioned table
+     * from the in memory structure if exists, else it will
+     * fetch the table from the physical storage, put it in-memory and return
+     * @param tableName - name of the table to be retrieved
+     * @return returns the fetched table if it exists else return null
+     */
     public Table getTable(String tableName) {
         Table table = null;
         if (tables.containsKey(tableName)){
@@ -38,72 +57,56 @@ public class DbService {
         return table;
     }
 
-    public void createTable(String tableName, List<Column> columns) {
+    /**
+     * This method acts as an API for the CREATE SQL Query
+     * @param tableName - name of the table to be created
+     * @param columns - list of the columns associated with the table
+     * @return - returns true if the table creation was successful
+     */
+    public boolean createTable(String tableName, List<Column> columns) {
         if (tables.containsKey(tableName)){
-            throw new RuntimeException("Table Already Exists");
+            System.out.println("Table Already Exists");
+            return false;
         }
         tables.put(tableName, new Table(columns, new ArrayList<>()));
         saveTable(tableName);
         saveMeta(tableName, columns);
+        return true;
     }
 
-    public void insert(String tableName, LinkedHashMap<String, Object> row) {
+    /**
+     * This method acts as an API for the INSERT SQL Query.
+     * @param tableName - name of the table in which row is to be inserted.
+     * @param row - the values that will be inserted in the table.
+     * @return - returns true if insertion was successful.
+     */
+    public boolean insert(String tableName, LinkedHashMap<String, Object> row) {
         Table table = tables.get(tableName);
-        //row.forEach((k,v) -> System.out.println(k + " " + v));
         if (!checkIntegrityConstraints(table, row)){
-            throw new RuntimeException("Integrity Contraints failed");
+            System.out.println("Integrity Contraints failed");
+            return false;
         }
         List<LinkedHashMap<String, Object>> values = table.getValues();
         values.add(row);
         table.setValues(values);
         saveTable(tableName);
-    }
-
-    public boolean checkIntegrityConstraints(Table table, Map<String, Object> row){
-        for(Map.Entry<String, Object> entry: row.entrySet()){
-            for(Column column: table.getColumns()){
-                if (column.getColumnName().equals(entry.getKey())){
-                    if (column.getColumnConstraint() == ColumnConstraint.UNIQUE){
-                        if (!checkUniqueConstraint(table, entry)){
-                            System.out.println("UNIQUE CONSTRAINT VIOLATION");
-                            return false;
-                        }
-                    }
-                    else if (column.getColumnConstraint() == ColumnConstraint.NOT_NULL
-                    && entry.getValue() == null){
-                        System.out.println("NOT NULL CONSTRAINT VIOLATION: " + entry.getKey());
-                        return false;
-                    }
-                    else if (column.getColumnConstraint() == ColumnConstraint.PRIMARY_KEY){
-                        if (entry.getValue() == null || !checkUniqueConstraint(table, entry)){
-                            System.out.println("PRIMARY KEY CONSTRAINT VIOLATION");
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
         return true;
     }
 
-    public boolean checkUniqueConstraint(Table table, Map.Entry<String, Object> entry){
-        String insertKey = entry.getKey();
-        String insertValue = entry.getValue().toString();
-        for(LinkedHashMap<String, Object> tableRow: table.getValues()){
-            if (tableRow.get(insertKey).toString().equals(insertValue)){
-                System.out.println("Duplicate value for UNIQUE constraint "+ insertKey + " : "+ insertValue);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public void update(String tableName,  Map<String,Object> updateData, 
+    /**
+     * This method acts as an API for the INSERT SQL Query
+     * @param tableName - name of the table that is to be updated.
+     * @param updateData - the data that is to be updated
+     * @param conditions - conditions in the WHERE clause
+     * @param logicalOperator - logical concatenation operator in the WHERE clause
+     * @return returns true if the update was successful.
+     */
+    public boolean update(String tableName,  Map<String,Object> updateData, 
     List<Condition> conditions, String logicalOperator ){
         Table table = getTable(tableName);    
         if (table == null){
             System.out.println("Table not found");
-            return;
+            return false;
         }
         for(int i = 0; i < table.getValues().size(); i++){
             LinkedHashMap<String, Object> row = table.getValues().get(i);
@@ -111,7 +114,7 @@ public class DbService {
                 for(Map.Entry<String, Object> entry: updateData.entrySet()){
                     if (!table.getValues().get(i).containsKey(entry.getKey())){
                         System.out.println("Update attribute: " + entry.getKey() + " Not found");
-                        return;
+                        return false;
                     }
                 }
                 if (checkIntegrityConstraints(table, updateData)){
@@ -123,8 +126,17 @@ public class DbService {
             }
         }
         saveTable(tableName);
+        return true;
     }
 
+    /**
+     * This method acts as an API for the SELECT SQL Query
+     * @param tableName - name of the table from which data is to be selected.
+     * @param columnNames - name of the columns to be selected.
+     * @param conditions - conditions in the WHERE clause.
+     * @param logicalOperator - logical concatenation operator in the WHERE clause
+     * @return
+     */
     public Table select(String tableName, List<String> columnNames, 
                         List<Condition> conditions, String logicalOperator) {
 
@@ -136,7 +148,6 @@ public class DbService {
         if (columnNames.isEmpty()){
             columnNames = table.getColumnNames();
         }
-        //System.out.println();
         List<LinkedHashMap<String, Object>> result = new ArrayList<>();
         for (LinkedHashMap<String, Object> row : table.getValues()) {
             if(sastisfyConditions(row, conditions, logicalOperator)){
@@ -158,6 +169,13 @@ public class DbService {
         return new Table(resultColumns, result);
     }
 
+    /**
+     * This is a utility method that checks a row of the table against the WHERE conditions 
+     * @param row - row against which the where conditions will be checked.
+     * @param conditions - WHERE conditions to be checked
+     * @param logicalOperator - logical operator in the WHERE clause.
+     * @return returns true if all the conditons pass
+     */
     private boolean sastisfyConditions(LinkedHashMap<String, Object> row, 
                             List<Condition> conditions, String logicalOperator) {
         
@@ -167,7 +185,8 @@ public class DbService {
             String conditionKey = condition.getLeftOperand();
             String conditionValue = condition.getRightOperand();
             if (!row.containsKey(conditionKey)){
-                throw new RuntimeException("Where clause key: "+ conditionKey + " Not found");
+                System.out.println("Where clause key: "+ conditionKey + " Not found");
+                return false;
             }
             String rowValue = (String) row.get(conditionKey);
             conditionResults.add(testCondition(conditionKey, conditionValue, rowValue, condition.getOperator()));
@@ -182,6 +201,14 @@ public class DbService {
         return true;
     }
 
+    /**
+     * This is a utility method that verifies the equation that contains LHS and RHS
+     * @param conditionKey - key specified in the condition
+     * @param conditionValue - value associated with the condition
+     * @param rowValue - value of the row, against which the equation will be verified
+     * @param operator - operator of the equation
+     * @return returns true if the condition is verified against the rowValue.
+     */
     private boolean testCondition(String conditionKey, String conditionValue, 
                                   String rowValue, String operator) {
         
@@ -209,11 +236,18 @@ public class DbService {
         }
     }
 
-    public void delete(String tableName, List<Condition> conditions, String logicalOperator) {
+    /**
+     * The method acts as an API for DELETE SQL Query
+     * @param tableName - the name of the table on which delete is to be performed
+     * @param conditions - WHERE conditions in the query.
+     * @param logicalOperator - logical concatenation operator of WHERE clause.
+     * @return - returns true if deletion was successful.
+     */
+    public boolean delete(String tableName, List<Condition> conditions, String logicalOperator) {
         Table table = getTable(tableName);    
         if (table == null){
             System.out.println("Table not found");
-            return;
+            return false;
         }
         List<LinkedHashMap<String, Object>> values = table.getValues();
         values.removeIf(row -> {
@@ -224,43 +258,111 @@ public class DbService {
         });
         table.setValues(values);
         saveTable(tableName);
+        return true;
     }
 
-    public void saveMeta(String tableName, List<Column> columns) {
+    /**
+     * This is a utility method that checks the integrity constraints of the new row
+     * that is to be inserted with the constrains of the table in which the row is 
+     * to be inserted.
+     * @param table - The table in which the row is to be inserted.
+     * @param row - the values to be inserted in the row.
+     * @return - returns true if the values pass the integrity contraints.
+     */
+    private boolean checkIntegrityConstraints(Table table, Map<String, Object> row){
+        for(Map.Entry<String, Object> entry: row.entrySet()){
+            for(Column column: table.getColumns()){
+                if (column.getColumnName().equals(entry.getKey())){
+                    if (column.getColumnConstraint() == ColumnConstraint.UNIQUE){
+                        if (!checkUniqueConstraint(table, entry)){
+                            System.out.println("UNIQUE CONSTRAINT VIOLATION");
+                            return false;
+                        }
+                    }
+                    else if (column.getColumnConstraint() == ColumnConstraint.NOT_NULL
+                    && entry.getValue() == null){
+                        System.out.println("NOT NULL CONSTRAINT VIOLATION: " + entry.getKey());
+                        return false;
+                    }
+                    else if (column.getColumnConstraint() == ColumnConstraint.PRIMARY_KEY){
+                        if (entry.getValue() == null || !checkUniqueConstraint(table, entry)){
+                            System.out.println("PRIMARY KEY CONSTRAINT VIOLATION");
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    /**
+     * This is a utility method that checks the UNIQUE constraint by comparing the
+     * row to be inserted with the entire data in the table.
+     * @param table - The table in which new row is to be inserted.
+     * @param entry - the entry object which is to be inserted.
+     * @return returns true if the values pass the UNIQUE constraints.
+     */
+    public boolean checkUniqueConstraint(Table table, Map.Entry<String, Object> entry){
+        String insertKey = entry.getKey();
+        String insertValue = entry.getValue().toString();
+        for(LinkedHashMap<String, Object> tableRow: table.getValues()){
+            if (tableRow.get(insertKey).toString().equals(insertValue)){
+                System.out.println("Duplicate value for UNIQUE constraint "+ insertKey + " : "+ insertValue);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * This is a utility method that saves the Column data phyisically which includes
+     * the datatype of the column and the integrity constraints imposed on the column
+     * @param tableName - name of the table whose columns these belong to
+     * @param columns - list of the columns
+     * @return - returns true if save was successful.
+     */
+    public boolean saveMeta(String tableName, List<Column> columns) {
         String metaPath = dataDirectory + tableName + ".meta";
         File metaFile = new File(metaPath);
         if (!metaFile.exists()){
-            //TODO: Create exception
             System.out.println("File DNE");
             try {
                 metaFile.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();
+                return false;
             }
         }
         try (PrintWriter writer = new PrintWriter(new FileWriter(metaPath))) {
             for (Column column : columns) { 
                 List<String> values = new ArrayList<>(Arrays.asList(column.getColumnName(), 
-                                                                    column.getDataType(), 
-                                                                    column.getColumnConstraint() == null ? "NONE" : column.getColumnConstraint().toString()));
+                                                                    column.getDataType(),
+                                                                    handleNull(column.getColumnConstraint())));
                 String line = String.join(",", values);
                 writer.println(line);
             }
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
-    public void saveTable(String tableName) {
+    /**
+     * This is a utility method that saves the table physically
+     * @param tableName - name of the table that is to be saved.
+     * @return - returns true if save was successful.
+     */
+    public boolean saveTable(String tableName) {
         String tablePath = dataDirectory + tableName + ".csv";
         File tableFile = new File(tablePath);
         if (!tableFile.exists()){
-            //TODO: Create exception
             System.out.println("File DNE");
             try {
                 tableFile.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();
+                return false;
             }
         }
         try (PrintWriter writer = new PrintWriter(new FileWriter(tablePath))) {
@@ -279,13 +381,27 @@ public class DbService {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
+    /**
+     * This is a utility method that checks if the object is null
+     * before invoking the toString() method
+     * @param object - object that needs to be null checked.
+     * @return - returns empty string if the object is null, else returns toString() invocation of the object.
+     */
     private String handleNull(Object object) {
         return object == null ? " " : object.toString();
     }
 
+    /**
+     * This is a utility method that loads the Column information
+     * from the physical storage.
+     * @param tableName - table name whose columns are to be loaded
+     * @return returns the list of the Columns associated with the table.
+     */
     public List<Column> loadMeta(String tableName) {
         String metaPath = dataDirectory + tableName + ".meta";
         File metaFile = new File(metaPath);
@@ -314,6 +430,11 @@ public class DbService {
         return metaList;
     }
 
+    /**
+     * This is a utility method that loads table from the physical storage.
+     * @param tableName - table name to be loaded
+     * @return returns the loaded table entity.
+     */
     public Table loadTable(String tableName) {
         String tablePath = dataDirectory + tableName + ".csv";
         File tableFile = new File(tablePath);
@@ -350,12 +471,17 @@ public class DbService {
         return new Table(metaList, rows);
     }
 
+    /**
+     * This is a utlity method that parses the ColumnConstraint String into the respective enum values
+     * @param columnConstraintString - column constraint string to be parsed.
+     * @return returns the enum value of the column constraint.
+     */
     private ColumnConstraint parseColumnConstraint(String columnConstraintString){
         if (columnConstraintString.equals("UNIQUE")){
             return ColumnConstraint.UNIQUE;
         } else if (columnConstraintString.equals("NOT_NULL")){
             return ColumnConstraint.NOT_NULL;
-        } else if (columnConstraintString.equals("NONE")){
+        } else if (columnConstraintString.equals(" ")){
             return null;
         } else {
             return ColumnConstraint.PRIMARY_KEY;
