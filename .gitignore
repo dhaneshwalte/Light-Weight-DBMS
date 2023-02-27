@@ -4,3 +4,6 @@ meta/auth.csv
 database
 .idea
 P2.iml
+target
+target/classes/dal/dmw/w23/DbService.class
+target/classes/dal/dmw/w23/AuthService.class

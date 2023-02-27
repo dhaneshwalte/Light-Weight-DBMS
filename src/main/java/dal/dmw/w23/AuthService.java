@@ -12,10 +12,10 @@ import com.opencsv.CSVWriter;
 import dal.dmw.w23.models.UserInfo;
 
 public class AuthService {
-    private String authFilePath = "meta/auth.csv";
+    private String authFilePath = "meta/auth.txt";
     private static UserInfo principle;
     public boolean authenticate(String username, String password) {
-        UserInfo userInfo = getUserInfoFromCsv(username);
+        UserInfo userInfo = getUserInfoFromFile(username);
         if (userInfo == null){
             //TODO: Make custom exception
             System.out.println("User not found");
@@ -40,7 +40,7 @@ public class AuthService {
         return principle;
     }
 
-    private UserInfo getUserInfoFromCsv(String username){
+    private UserInfo getUserInfoFromFile(String username){
         UserInfo userInfo = null;
         try {
             FileReader reader = new FileReader(this.authFilePath);
