@@ -27,7 +27,6 @@ public class QueryEngine {
             dbService.createTable(createQuery.getTableName(), createQuery.getColumns());
         } else if (query.getQueryType() == QueryType.SELECT){
             SelectQuery selectQuery = (SelectQuery) query;
-            //TODO: Check valid operators for the conditions
             Table result = dbService.select(selectQuery.getTableName(), 
                                             selectQuery.getColumnNames(), 
                                             selectQuery.getConditions(),
@@ -56,8 +55,6 @@ public class QueryEngine {
                 System.out.println();
             }
             System.out.println(seperator);
-            //Table table = dbService.select(query.getTableName(), query.getColumns());
-            //filterWhereCondition(table, query.getConditions());
         } else if (query.getQueryType() == QueryType.INSERT){
             InsertQuery insertQuery = (InsertQuery) query;
             Table table = dbService.getTable(query.getTableName());
@@ -105,7 +102,6 @@ public class QueryEngine {
         } else if (query.getQueryType() == QueryType.DELETE){
             DeleteQuery deleteQuery = (DeleteQuery) query;
             System.out.println(deleteQuery);
-            //TODO: Verify data types in the set and integrity
             dbService.delete(deleteQuery.getTableName(),
                              deleteQuery.getConditions(), 
                              deleteQuery.getLogicalOperator());
@@ -121,7 +117,6 @@ public class QueryEngine {
                         int openBraceIndex = column.getDataType().toLowerCase().indexOf("[");
                         int closeBraceIndex = column.getDataType().toLowerCase().indexOf("]");
                         int varcharLength = Integer.parseInt(column.getDataType().substring(openBraceIndex+1, closeBraceIndex));
-                        //System.out.println(varcharLength);
                         if (entry.getValue().toString().length() > varcharLength){
                             System.out.println("Length exceeds");
                             return false;

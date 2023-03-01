@@ -42,7 +42,6 @@ public class AuthService {
         UserInfo userInfo = getUserInfoFromFile(username);
 
         if (userInfo == null){
-            //TODO: Make custom exception
             System.out.println("User not found");
             return false;
         }
@@ -67,7 +66,6 @@ public class AuthService {
     public boolean register(String username, String password){
         UserInfo userinfo = getUserInfoFromFile(username);
         if (userinfo != null){
-            //TODO: throw exception
             return false;
         }
         String hashedPassword = getHashedPassword(password);
