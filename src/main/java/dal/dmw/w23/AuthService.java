@@ -85,9 +85,9 @@ public class AuthService {
             }
             printWriter = new PrintWriter(fileWriter);
             if (writeHeaders){
-                printWriter.println(String.join(",", headers));
+                printWriter.println(String.join(Constants.fileSeparator, headers));
             }
-            String line = String.join(",", values);
+            String line = String.join(Constants.fileSeparator, values);
             printWriter.println(line);
             printWriter.close();
         }
@@ -116,7 +116,7 @@ public class AuthService {
             bufferedReader = new BufferedReader(reader);
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                String[] values = line.split(",");
+                String[] values = line.split(Constants.fileSeparator);
                 if (values[0].equals(username)) {
                     userInfo = new UserInfo(values[0], values[1]);
                     break;

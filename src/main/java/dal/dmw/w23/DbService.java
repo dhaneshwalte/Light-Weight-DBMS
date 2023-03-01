@@ -33,7 +33,7 @@ public class DbService {
     private Map<String, Table> tables;
 
     public DbService(String dbName) {
-        this.dataDirectory = "database/" + dbName + "/";
+        this.dataDirectory = Constants.databasePath + dbName + "/";
         tables = new HashMap<>();
     }
     
@@ -322,7 +322,7 @@ public class DbService {
      * @return - returns true if save was successful.
      */
     public boolean saveMeta(String tableName, List<Column> columns) {
-        String metaPath = dataDirectory + tableName + ".meta";
+        String metaPath = dataDirectory + tableName + Constants.metaFileExtension;
         File metaFile = new File(metaPath);
         if (!metaFile.exists()){
             System.out.println("File DNE");
@@ -338,7 +338,7 @@ public class DbService {
                 List<String> values = new ArrayList<>(Arrays.asList(column.getColumnName(), 
                                                                     column.getDataType(),
                                                                     handleNull(column.getColumnConstraint())));
-                String line = String.join(",", values);
+                String line = String.join(Constants.fileSeparator, values);
                 writer.println(line);
             }
         } catch (IOException e) {
@@ -354,7 +354,7 @@ public class DbService {
      * @return - returns true if save was successful.
      */
     public boolean saveTable(String tableName) {
-        String tablePath = dataDirectory + tableName + ".csv";
+        String tablePath = dataDirectory + tableName + Constants.tableFileExtension;
         File tableFile = new File(tablePath);
         if (!tableFile.exists()){
             System.out.println("File DNE");
@@ -369,14 +369,14 @@ public class DbService {
             Table table = tables.get(tableName);
             List<String> columnNames = new ArrayList<>();
             table.getColumns().forEach(column -> columnNames.add(column.getColumnName()));
-            String header = String.join(",", columnNames);
+            String header = String.join(Constants.fileSeparator, columnNames);
             writer.println(header);
             for (Map<String, Object> row : table.getValues()) {
                 List<String> values = new ArrayList<>();
                 for (Object value : row.values()) {
                     values.add(handleNull(value));
                 }
-                String line = String.join(",", values);
+                String line = String.join(Constants.fileSeparator, values);
                 writer.println(line);
             }
         } catch (IOException e) {
@@ -417,7 +417,7 @@ public class DbService {
             bufferedReader = new BufferedReader(reader);
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                String[] values = line.split(",");
+                String[] values = line.split(Constants.fileSeparator);
                 ColumnConstraint columnConstraint = parseColumnConstraint(values[2]);
                 metaList.add(new Column(values[0], values[1], columnConstraint));
             }
@@ -436,7 +436,7 @@ public class DbService {
      * @return returns the loaded table entity.
      */
     public Table loadTable(String tableName) {
-        String tablePath = dataDirectory + tableName + ".csv";
+        String tablePath = dataDirectory + tableName + Constants.tableFileExtension;
         File tableFile = new File(tablePath);
         if (!tableFile.exists()){
             System.out.println("Table does not exist");
@@ -448,10 +448,10 @@ public class DbService {
         try {
             reader = new FileReader(tablePath);
             bufferedReader = new BufferedReader(reader);
-            String[] headers = bufferedReader.readLine().split(",");
+            String[] headers = bufferedReader.readLine().split(Constants.fileSeparator);
             String line;
             while ((line = bufferedReader.readLine()) != null) {
-                String[] values = line.split(",");
+                String[] values = line.split(Constants.fileSeparator);
                 int totalColumns = values.length;
                 LinkedHashMap<String, Object> row = new LinkedHashMap<>();
                 for (int i = 0; i < totalColumns; i++) {
