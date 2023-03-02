@@ -45,6 +45,9 @@ public class QueryEngine {
                                             selectQuery.getConditions(),
                                             selectQuery.getLogicalOperator());
             
+            if (result == null){
+                return false;
+            }
             StringBuilder seperator = new StringBuilder("-");
             for(int i = 0; i < 16*result.getColumnNames().size(); i++) seperator.append("-");
             System.out.println(seperator);
