@@ -12,28 +12,30 @@ public class App {
 
     static void handleMainMenu(){
         Scanner scanner = new Scanner(System.in);
-        System.out.println("1. Login\n2. Register");
+        System.out.println("1. Login\n2. Register\n3. Exit\nEnter Choice: ");
         int choice = Integer.parseInt(scanner.nextLine());
         if (choice == 1){
-            handleLogin();
+            handleLogin(scanner);
+            handleMainMenu();
         }
         else if (choice == 2){
-            handleRegistration();
+            handleRegistration(scanner);
             handleMainMenu();
+        }
+        else if (choice == 3){
+            System.exit(0);
         }
         scanner.close();
     }
 
-    static void handleLogin(){
+    static void handleLogin(Scanner scanner){
         AuthService authService = new AuthService();
-        Scanner scanner = new Scanner(System.in);
         System.out.println("Enter username");
         String username = scanner.nextLine();
         System.out.println("Enter Password");
         String password = scanner.nextLine();
         if (!authService.authenticate(username, password)){
-            System.out.println("Invalid Credentials");
-            scanner.close();
+            System.out.println("Invalid Credentials, Please try again");
             return;
         }
         System.out.println("Login Successful");
@@ -45,9 +47,8 @@ public class App {
         }
     }
 
-    static void handleRegistration(){
+    static void handleRegistration(Scanner scanner){
         AuthService authService = new AuthService();
-        Scanner scanner = new Scanner(System.in);
         System.out.println("Enter username");
         String username = scanner.nextLine();
         System.out.println("Enter Password");
@@ -57,7 +58,6 @@ public class App {
         }else{
             System.out.println("User already exists");
         }
-        scanner.close();
     }
 
     public void testSql(){
