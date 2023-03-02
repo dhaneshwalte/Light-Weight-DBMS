@@ -13,18 +13,30 @@ import dal.dmw.w23.models.SelectQuery;
 import dal.dmw.w23.models.Table;
 import dal.dmw.w23.models.UpdateQuery;
 
-
+/**
+ * This is a service class that connects the DbService (DB APIs) and the SqlParser class
+ */
 public class QueryEngine {
+    /**
+     * Instance of the dbservice class to call the db apis
+     */
     DbService dbService;
     QueryEngine(){
         dbService = new DbService("dbname");
     }
-    public void executeQuery(String Sql){
+
+    /**
+     * A General method that extracts the Query attributes and calls the
+     * respective APIs depending on the Query Type.
+     * @param Sql - SQL String
+     * @return - returns true, if query was executed successfully.
+     */
+    public boolean executeQuery(String Sql){
         SqlParser sqlParser = new SqlParser(Sql);
         Query query = sqlParser.parse();
         if (query.getQueryType() == QueryType.CREATE){
             CreateQuery createQuery = (CreateQuery) query;
-            dbService.createTable(createQuery.getTableName(), createQuery.getColumns());
+            return dbService.createTable(createQuery.getTableName(), createQuery.getColumns());
         } else if (query.getQueryType() == QueryType.SELECT){
             SelectQuery selectQuery = (SelectQuery) query;
             Table result = dbService.select(selectQuery.getTableName(), 
@@ -55,6 +67,7 @@ public class QueryEngine {
                 System.out.println();
             }
             System.out.println(seperator);
+            return true;
         } else if (query.getQueryType() == QueryType.INSERT){
             InsertQuery insertQuery = (InsertQuery) query;
             Table table = dbService.getTable(query.getTableName());
@@ -71,42 +84,53 @@ public class QueryEngine {
             //If column names are provided but number of values dont match
             if (!queryColumnNames.isEmpty() 
                 && insertQuery.getValues().size() != insertQuery.getColumnNames().size()){
-                    throw new RuntimeException("Insufficient Values");
+                    System.out.println("Insufficient Values");
+                    return false;
                 }
             if (queryColumnNames.isEmpty()){
                 if (insertQuery.getValues().size() != table.getColumnNames().size()){
-                    throw new RuntimeException("Insufficient Values");
+                    System.out.println("Insufficient Values");
+                    return false;
                 }
                 for(int i = 0; i < insertQuery.getValues().size(); i++){
                     row.put(table.getColumnNames().get(i), insertQuery.getValues().get(i));
                 }
             }
             if (verifyDataTypes(table.getColumns(), row)){
-                dbService.insert(insertQuery.getTableName(), row);
+                return dbService.insert(insertQuery.getTableName(), row);
             } else {
                 System.out.println("Data Type Mismatch");
+                return false;
             }
         } else if (query.getQueryType() == QueryType.UPDATE){
             UpdateQuery updateQuery = (UpdateQuery) query;
             Table table = dbService.getTable(updateQuery.getTableName());
             if (table == null){
-                throw new RuntimeException("Table does not exist");
+                System.out.println("Table does not exist");
+                return false;
             }
             if (verifyDataTypes(table.getColumns(), updateQuery.getData())){
-                dbService.update(updateQuery.getTableName(), 
-                                 updateQuery.getData(), 
-                                 updateQuery.getConditions(), 
-                                 updateQuery.getLogicalOperator());
+                return dbService.update(updateQuery.getTableName(), 
+                                        updateQuery.getData(), 
+                                        updateQuery.getConditions(), 
+                                        updateQuery.getLogicalOperator());
             }
             
         } else if (query.getQueryType() == QueryType.DELETE){
             DeleteQuery deleteQuery = (DeleteQuery) query;
-            System.out.println(deleteQuery);
-            dbService.delete(deleteQuery.getTableName(),
+            return dbService.delete(deleteQuery.getTableName(),
                              deleteQuery.getConditions(), 
                              deleteQuery.getLogicalOperator());
         }
+        return false;
     }
+
+    /**
+     * This method verifies the datatypes against a row to be put in the db
+     * @param columns - Columns which datatype needs to be checked
+     * @param row - Data values in a row
+     * @return - returns true if all datatypes of the row are inline with the column
+     */
     private boolean verifyDataTypes(List<Column> columns, Map<String, Object> row) {
         for(Map.Entry<String, Object> entry: row.entrySet()){
             //Skip if the value is null
