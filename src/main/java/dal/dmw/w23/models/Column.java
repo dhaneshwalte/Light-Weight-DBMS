@@ -1,8 +1,20 @@
 package dal.dmw.w23.models;
 
+/**
+ * Class to represent a Column of a table
+ */
 public class Column{
+    /**
+     * Name of the Column
+     */
     String columnName;
+    /**
+     * Datatype of the column
+     */
     String dataType;
+    /**
+     * Constraint to be imposed on the column, (UNIQUE, NOT NULL etc)
+     */
     ColumnConstraint columnConstraint;
     public Column(String columnName, String dataType, ColumnConstraint columnConstraint) {
         this.columnName = columnName;

@@ -2,7 +2,13 @@ package dal.dmw.w23.models;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Class that represents the UpdateQuery
+ */
 public class UpdateQuery extends Query{
+    /**
+     * Data to be updated, provided in the UpdateQuery
+     */
     Map<String,Object> data;
 
     public UpdateQuery() {

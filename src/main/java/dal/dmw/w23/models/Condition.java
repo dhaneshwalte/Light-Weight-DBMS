@@ -1,9 +1,22 @@
 package dal.dmw.w23.models;
 
+/**
+ * Class that represents a condition of the WHERE clause.
+ */
 public class Condition{
+    /**
+     * leftOperand of the where conditon
+     */
     String leftOperand;
+    /**
+     * rightOperand of the where condition
+     */
     String rightOperand;
+    /**
+     * operator of the where condition
+     */
     String operator;
+    
     public Condition(String leftOperand, String rightOperand, String operator) {
         this.leftOperand = leftOperand;
         this.rightOperand = rightOperand;

@@ -2,11 +2,29 @@ package dal.dmw.w23.models;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Parent Query Class that acts as a base class to represent all the Query types
+ */
 public class Query {
+    /**
+     * Type of the Query
+     */
     QueryType queryType;
+    /**
+     * Name of the table on which query is to be executed
+     */
     String tableName;
+    /**
+     * List of the columnNames provided
+     */
     List<String> columnNames;
+    /**
+     * List of the conditions in the WHERE clause
+     */
     List<Condition> conditions;
+    /**
+     * Logical operator in the WHERE clause
+     */
     String logicalOperator;
     
     public Query() {

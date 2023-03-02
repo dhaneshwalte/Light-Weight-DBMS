@@ -3,8 +3,18 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+/**
+ * Class that represents the dataframe of the table
+ */
 public class Table {
+    /**
+     * List of the columns in the table
+     */
     List<Column> columns;
+
+    /**
+     * List of the values in the table
+     */
     List<LinkedHashMap<String, Object>> values;
 
     public Table(List<Column> columns, List<LinkedHashMap<String, Object>> values) {
