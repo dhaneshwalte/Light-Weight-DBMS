@@ -12,7 +12,7 @@ public class App {
 
     static void handleMainMenu(){
         Scanner scanner = new Scanner(System.in);
-        System.out.println("1. Login\n2. Register\n3. Exit\nEnter Choice: ");
+        System.out.print("1. Login\n2. Register\n3. Exit\nEnter Choice: ");
         int choice = Integer.parseInt(scanner.nextLine());
         if (choice == 1){
             handleLogin(scanner);
