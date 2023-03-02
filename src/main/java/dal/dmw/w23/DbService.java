@@ -333,7 +333,6 @@ public class DbService {
         String metaPath = dataDirectory + tableName + Constants.metaFileExtension;
         File metaFile = new File(metaPath);
         if (!metaFile.exists()){
-            System.out.println("File DNE");
             try {
                 metaFile.createNewFile();
             } catch (IOException e) {
@@ -365,7 +364,6 @@ public class DbService {
         String tablePath = dataDirectory + tableName + Constants.tableFileExtension;
         File tableFile = new File(tablePath);
         if (!tableFile.exists()){
-            System.out.println("File DNE");
             try {
                 tableFile.createNewFile();
             } catch (IOException e) {
