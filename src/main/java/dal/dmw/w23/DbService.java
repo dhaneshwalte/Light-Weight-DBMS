@@ -32,9 +32,12 @@ public class DbService {
      */
     private Map<String, Table> tables;
 
+    private Logger logger;
+
     public DbService(String dbName) {
         this.dataDirectory = Constants.databasePath + dbName + "/";
         tables = new HashMap<>();
+        logger = new Logger();
     }
     
     /**
@@ -71,6 +74,7 @@ public class DbService {
         tables.put(tableName, new Table(columns, new ArrayList<>()));
         saveTable(tableName);
         saveMeta(tableName, columns);
+        logger.log("Created Table - " + tableName);
         return true;
     }
 
@@ -90,6 +94,7 @@ public class DbService {
         values.add(row);
         table.setValues(values);
         saveTable(tableName);
+        logger.log("Inserted - " + row.toString() + " In Table " + tableName);
         return true;
     }
 
@@ -122,6 +127,7 @@ public class DbService {
                             LinkedHashMap<String, Object> value = table.getValues().get(i);
                             value.put(entry.getKey(), entry.getValue());
                     }
+                    logger.log("Updated - " + updateData.toString() + " In Table " + tableName);
                 }
             }
         }
@@ -166,6 +172,7 @@ public class DbService {
                 }
             }
         }
+        logger.log("Selected - " + "In Table " + tableName);
         return new Table(resultColumns, result);
     }
 
@@ -258,6 +265,7 @@ public class DbService {
         });
         table.setValues(values);
         saveTable(tableName);
+        logger.log("Deleted - " + " In Table " + tableName);
         return true;
     }
 

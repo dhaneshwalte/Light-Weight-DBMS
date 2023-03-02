@@ -69,11 +69,9 @@ public class AuthService {
             return false;
         }
         String hashedPassword = getHashedPassword(password);
-        String[] headers = { "username", "hashedPassword" };
         String[] values = { username, hashedPassword };
         FileWriter fileWriter = null;
         PrintWriter printWriter = null;
-        boolean writeHeaders = false;
         File authFile = new File(authFilePath);
         try{
             if (authFile.exists()){
@@ -81,12 +79,8 @@ public class AuthService {
             } else {
                 authFile.createNewFile();
                 fileWriter = new FileWriter(authFilePath);
-                writeHeaders = true;
             }
             printWriter = new PrintWriter(fileWriter);
-            if (writeHeaders){
-                printWriter.println(String.join(Constants.fileSeparator, headers));
-            }
             String line = String.join(Constants.fileSeparator, values);
             printWriter.println(line);
             printWriter.close();
