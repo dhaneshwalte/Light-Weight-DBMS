@@ -38,6 +38,12 @@ public class App {
             System.out.println("Invalid Credentials, Please try again");
             return;
         }
+        System.out.println("Security Question: " + authService.getSecurityQuestion(username));
+        String answer = scanner.nextLine();
+        if (!authService.verifySecurityQA(username, answer)){
+            System.out.println("Incorrect Answer To The Security Question, Please try again");
+            return;
+        }
         System.out.println("Login Successful");
         while(true){
             System.out.print(">> ");
@@ -51,12 +57,18 @@ public class App {
         AuthService authService = new AuthService();
         System.out.println("Enter username");
         String username = scanner.nextLine();
+        if (authService.exists(username)){
+            System.out.println("User Already Exists");
+            return;
+        }
         System.out.println("Enter Password");
         String password = scanner.nextLine();
-        if(authService.register(username, password)){
+        System.out.println("Enter Security Question");
+        String securityQuestion = scanner.nextLine();
+        System.out.println("Enter Security Answer");
+        String securityAnswer = scanner.nextLine();
+        if(authService.register(username, password, securityQuestion, securityAnswer)){
             System.out.println("Registration Successful");
-        }else{
-            System.out.println("User already exists");
         }
     }
 

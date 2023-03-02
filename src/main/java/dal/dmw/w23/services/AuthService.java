@@ -48,7 +48,7 @@ public class AuthService {
         }
 
         String userPasswordHashed = userInfo.getHashedPassword();
-        String inputPasswordHashed = getHashedPassword(password);
+        String inputPasswordHashed = getHashedValue(password);
 
         if (userPasswordHashed.equals(inputPasswordHashed)) {
             return true;
@@ -63,15 +63,15 @@ public class AuthService {
      * @param password - input password
      * @return - returns true if user registration is successful.
      */
-
-    public boolean register(String username, String password){
+    public boolean register(String username, String password, String securityQuestion, String securityAnswer){
         UserInfo userinfo = getUserInfoFromFile(username);
         if (userinfo != null){
             System.out.println("User already exists");
             return false;
         }
-        String hashedPassword = getHashedPassword(password);
-        String[] values = { username, hashedPassword };
+        String hashedPassword = getHashedValue(password);
+        String hashedSecurityAnswer = getHashedValue(securityAnswer);
+        String[] values = { username, hashedPassword, securityQuestion, hashedSecurityAnswer };
         FileWriter fileWriter = null;
         PrintWriter printWriter = null;
         File authFile = new File(authFilePath);
@@ -116,7 +116,7 @@ public class AuthService {
             while ((line = bufferedReader.readLine()) != null) {
                 String[] values = line.split(Constants.fileSeparator);
                 if (values[0].equals(username)) {
-                    userInfo = new UserInfo(values[0], values[1]);
+                    userInfo = new UserInfo(values[0], values[1], values[2], values[3]);
                     break;
                 }
             }
@@ -133,7 +133,7 @@ public class AuthService {
      * @param password - input password
      * @return - returns the hash of the input password.
      */
-    public String getHashedPassword(String password){
+    public String getHashedValue(String password){
         messageDigest.update(password.getBytes());
         byte[] bytes = messageDigest.digest();
         StringBuilder stringBuilder = new StringBuilder();
@@ -141,5 +141,58 @@ public class AuthService {
             stringBuilder.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
         }
         return stringBuilder.toString();
+    }
+    
+    /**
+     * Utility method to fetch security question of the user
+     * @param username - name of the user
+     * @return returns the security question if user exists.
+     */
+    public String getSecurityQuestion(String username) {
+        UserInfo userInfo = getUserInfoFromFile(username);
+
+        if (userInfo == null){
+            System.out.println("User not found");
+            return null;
+        }
+
+        return userInfo.getSecurityQuestion();
+    }
+
+    /**
+     * Utility method to verify security answer of the user
+     * @param username - name of the user
+     * @param securityAnswer - answer provided by the user
+     * @return returns true if the security answer matches
+     */
+    public boolean verifySecurityQA(String username, String securityAnswer) {
+        UserInfo userInfo = getUserInfoFromFile(username);
+
+        if (userInfo == null){
+            System.out.println("User not found");
+            return false;
+        }
+
+        String userSecurityAnswer = userInfo.getSecurityAnswer();
+        String inputHashedSecurityAnswer = getHashedValue(securityAnswer);
+
+        if (userSecurityAnswer.equals(inputHashedSecurityAnswer)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Utility method that checks if the username already exists
+     * @param username username that needs to be checked
+     * @return returns true if username exists
+     */
+    public boolean exists(String username) {
+        UserInfo userinfo = getUserInfoFromFile(username);
+        if (userinfo != null){
+            return true;
+        }
+        return false;
     }
 }
