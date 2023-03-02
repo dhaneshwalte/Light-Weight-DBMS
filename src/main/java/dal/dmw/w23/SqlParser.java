@@ -13,9 +13,21 @@ import dal.dmw.w23.models.QueryType;
 import dal.dmw.w23.models.SelectQuery;
 import dal.dmw.w23.models.UpdateQuery;
 
+/**
+ * This class has methods that parses the SQL Query and 
+ * extracts tokens out of it.
+ */
 public class SqlParser {
 
+    /**
+     * This is the array contains the tokens extraced from the SQL String
+     */
     private String[] tokens;
+
+    /**
+     * Constructor that accepts the SQL and sets the tokens[] attribute
+     * @param sql - SQL String
+     */
     public SqlParser(String sql) {
         // Replace spaces between double quotes with pipe (|)
         // eg name = "Alfred Barnes" is a single entity and should not be split 
@@ -24,7 +36,6 @@ public class SqlParser {
             throw new RuntimeException("Invalid Double Quotes");
         }
         sql = replaceVarcharParantheses(sql);
-        System.out.println(sql);
         // Tokenize the SQL string
         tokens = sql
                     .trim()
@@ -35,10 +46,14 @@ public class SqlParser {
                     .split("\\s+");
         for(int i = 0; i < tokens.length; i++){
             tokens[i] = tokens[i].replaceAll("\\|", " "); //Replace pipe back with space
-            //System.out.println(tokens[i]);
         }
     }
 
+    /**
+     * This method is a general handler which calls the respective handler depending on
+     * the query type
+     * @return - returns the final Query object
+     */
     public Query parse() {
         // Identify the statement type
         String firstToken = tokens[0].toUpperCase();
@@ -57,6 +72,10 @@ public class SqlParser {
         }
     }
 
+    /**
+     * This method parses the SQL String for CREATE Query
+     * @return - returns the Query object.
+     */
     public Query parseCreateTableStatement() {
         int currentTokenIndex = 0;
         CreateQuery createQuery = new CreateQuery();
@@ -127,7 +146,12 @@ public class SqlParser {
 
         return createQuery;
     }
-    private Query parseSelectStatement() {
+
+    /**
+     * This method parses the SQL String for SELECT Query
+     * @return - returns the Query object.
+     */
+    public Query parseSelectStatement() {
         int currentTokenIndex = 0;
         SelectQuery selectQuery = new SelectQuery();
         selectQuery.setQueryType(QueryType.SELECT);
@@ -157,7 +181,11 @@ public class SqlParser {
         return selectQuery;
     }
 
-    private Query parseInsertStatement() {
+    /**
+     * This method parses the SQL String for INSERT Query
+     * @return - returns the Query object.
+     */
+    public Query parseInsertStatement() {
         int currentTokenIndex = 0;
         currentTokenIndex++;
         InsertQuery insertQuery = new InsertQuery();
@@ -214,7 +242,11 @@ public class SqlParser {
         return insertQuery;
     }
 
-    private Query parseUpdateStatement() {
+    /**
+     * This method parses the SQL String for UPDATE Query
+     * @return - returns the Query object.
+     */
+    public Query parseUpdateStatement() {
         int currentTokenIndex = 0;
         UpdateQuery updateQuery = new UpdateQuery();
         updateQuery.setQueryType(QueryType.UPDATE);
@@ -250,7 +282,11 @@ public class SqlParser {
         return updateQuery;
     }
 
-    private Query parseDeleteStatement() {
+    /**
+     * This method parses the SQL String for DELETE Query
+     * @return - returns the Query object.
+     */
+    public Query parseDeleteStatement() {
         int currentTokenIndex = 0;
         System.out.println("Delete statement");
         DeleteQuery deleteQuery = new DeleteQuery();
@@ -278,6 +314,11 @@ public class SqlParser {
         return deleteQuery;
     }
 
+    /**
+     * This is a utility method that updates the query object with where conditions
+     * @param currentTokenIndex - token index of the "WHERE" clause
+     * @param query - Query object that needs to be updated.
+     */
     private void handleWhereCondition(int currentTokenIndex, Query query) {
         if (currentTokenIndex < tokens.length) {
             currentTokenIndex++;
@@ -315,6 +356,12 @@ public class SqlParser {
         }
     }
 
+    /**
+     * Utility method that converts the paranthese of varchar from () to []
+     * This is needed to escape the addition of spaces around parantheses.
+     * @param input - input SQL String
+     * @return - returns the string after replacement.
+     */
     private String replaceVarcharParantheses(String input) {
         int index = input.toLowerCase().indexOf("varchar");
         while (index >= 0) { //varchar found
@@ -324,12 +371,6 @@ public class SqlParser {
                 throw new RuntimeException("Varchar syntax error");
             }
             if (start >= 0) { //opening brace for varchar
-                // // Remove any spaces between "varchar" and the opening parenthesis
-                // int spaceIndex = input.lastIndexOf(" ", start - 1);
-                // if (spaceIndex >= index) {
-                //     input = input.substring(0, spaceIndex) + input.substring(spaceIndex + 1);
-                //     start--;
-                // }
                 int end = input.indexOf(")", start);
                 if (end >= 0) {
                     input = input.substring(0, start) + "[" + input.substring(start + 1, end) + "]" + input.substring(end + 1);
@@ -343,6 +384,11 @@ public class SqlParser {
         return input;
     }
 
+    /**
+     * Utility method that handles space seperated values given in between double quotes
+     * @param input - input SQL string
+     * @return - returns the SQL string
+     */
     private String replaceSpacesBetweenQuotes(String input) {
         StringBuilder result = new StringBuilder();
         boolean inQuotes = false;
@@ -359,6 +405,11 @@ public class SqlParser {
         return result.toString();
     }
 
+    /**
+     * Utility method that checks if the double quotes are valid
+     * @param input - input SQL string
+     * @return returns true if the string is valid.
+     */
     private boolean checkValidQuotes(String input) {
         int count = 0;
         for (char c : input.toCharArray()) {
