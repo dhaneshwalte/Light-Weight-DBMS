@@ -21,8 +21,8 @@ public class QueryEngine {
      * Instance of the dbservice class to call the db apis
      */
     DbService dbService;
-    QueryEngine(){
-        dbService = new DbService("dbname");
+    QueryEngine(String username){
+        dbService = new DbService(username);
     }
 
     /**
@@ -34,6 +34,7 @@ public class QueryEngine {
     public boolean executeQuery(String Sql){
         SqlParser sqlParser = new SqlParser(Sql);
         Query query = sqlParser.parse();
+        
         if (query.getQueryType() == QueryType.CREATE){
             CreateQuery createQuery = (CreateQuery) query;
             return dbService.createTable(createQuery.getTableName(), createQuery.getColumns());
