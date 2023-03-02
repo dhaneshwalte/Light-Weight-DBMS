@@ -66,6 +66,7 @@ public class AuthService {
     public boolean register(String username, String password){
         UserInfo userinfo = getUserInfoFromFile(username);
         if (userinfo != null){
+            System.out.println("User already exists");
             return false;
         }
         String hashedPassword = getHashedPassword(password);
@@ -89,6 +90,8 @@ public class AuthService {
             e.printStackTrace();
             return false;
         }
+        File userDirectory = new File("database/"+username);
+        userDirectory.mkdir();
         return true;
     }
 
