@@ -1,77 +1,13 @@
 package dal.dmw.w23;
 
-import java.util.Scanner;
-
-import dal.dmw.w23.services.AuthService;
+import dal.dmw.w23.services.ConsoleService;
 import dal.dmw.w23.services.QueryEngine;
 
 public class App {
     public static void main( String[] args ){
-        handleMainMenu();
+        ConsoleService consoleService = new ConsoleService(System.in);
+        consoleService.run();
     }
-
-    static void handleMainMenu(){
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("1. Login\n2. Register\n3. Exit\nEnter Choice: ");
-        int choice = Integer.parseInt(scanner.nextLine());
-        if (choice == 1){
-            handleLogin(scanner);
-            handleMainMenu();
-        }
-        else if (choice == 2){
-            handleRegistration(scanner);
-            handleMainMenu();
-        }
-        else if (choice == 3){
-            System.exit(0);
-        }
-        scanner.close();
-    }
-
-    static void handleLogin(Scanner scanner){
-        AuthService authService = new AuthService();
-        System.out.println("Enter username");
-        String username = scanner.nextLine();
-        System.out.println("Enter Password");
-        String password = scanner.nextLine();
-        if (!authService.authenticate(username, password)){
-            System.out.println("Invalid Credentials, Please try again");
-            return;
-        }
-        System.out.println("Security Question: " + authService.getSecurityQuestion(username));
-        String answer = scanner.nextLine();
-        if (!authService.verifySecurityQA(username, answer)){
-            System.out.println("Incorrect Answer To The Security Question, Please try again");
-            return;
-        }
-        System.out.println("Login Successful");
-        while(true){
-            System.out.print(">> ");
-            String inpuString = scanner.nextLine();
-            QueryEngine queryEngine = new QueryEngine(username);
-            queryEngine.executeQuery(inpuString);
-        }
-    }
-
-    static void handleRegistration(Scanner scanner){
-        AuthService authService = new AuthService();
-        System.out.println("Enter username");
-        String username = scanner.nextLine();
-        if (authService.exists(username)){
-            System.out.println("User Already Exists");
-            return;
-        }
-        System.out.println("Enter Password");
-        String password = scanner.nextLine();
-        System.out.println("Enter Security Question");
-        String securityQuestion = scanner.nextLine();
-        System.out.println("Enter Security Answer");
-        String securityAnswer = scanner.nextLine();
-        if(authService.register(username, password, securityQuestion, securityAnswer)){
-            System.out.println("Registration Successful");
-        }
-    }
-
     public void testSql(){
         String selectString = "Select * from users";
         String updateString = "Update users set email = newjack@gmail.com where username=jack;";
