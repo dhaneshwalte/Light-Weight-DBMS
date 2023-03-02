@@ -43,6 +43,7 @@ public class SqlParser {
                     .replaceAll("\\)", " \\) ")
                     .replaceAll(",", " , ")
                     .replaceAll("=", " = ")
+                    .replaceAll(";", " ; ")
                     .split("\\s+");
         for(int i = 0; i < tokens.length; i++){
             tokens[i] = tokens[i].replaceAll("\\|", " "); //Replace pipe back with space
@@ -67,8 +68,13 @@ public class SqlParser {
             return parseDeleteStatement();
         } else if (firstToken.equals("CREATE")) {
             return parseCreateTableStatement();
-        } else {
-            throw new RuntimeException("Unsupported SQL statement type");
+        } else if (firstToken.equals("EXIT")){
+            System.exit(0);
+            return null;
+        }
+        else {
+            System.out.println("Unsupported SQL statement type");
+            return null;
         }
     }
 
@@ -320,7 +326,7 @@ public class SqlParser {
      * @param query - Query object that needs to be updated.
      */
     private void handleWhereCondition(int currentTokenIndex, Query query) {
-        if (currentTokenIndex < tokens.length) {
+        if (currentTokenIndex+2 < tokens.length) {
             currentTokenIndex++;
             // Parse first condition
             String leftOperand = tokens[currentTokenIndex];
