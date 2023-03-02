@@ -1,4 +1,4 @@
-package dal.dmw.w23;
+package dal.dmw.w23.services;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import dal.dmw.w23.Constants;
 import dal.dmw.w23.models.UserInfo;
 
 //Reference - https://howtodoinjava.com/java/java-security/how-to-generate-secure-password-hash-md5-sha-pbkdf2-bcrypt-examples/
@@ -24,7 +25,7 @@ public class AuthService {
      * messageDigest for calculating hash value of user password
      */
     MessageDigest messageDigest = null;
-    AuthService(){
+    public AuthService(){
         try{
             messageDigest = MessageDigest.getInstance("MD5");
         }

@@ -2,6 +2,9 @@ package dal.dmw.w23;
 
 import java.util.Scanner;
 
+import dal.dmw.w23.services.AuthService;
+import dal.dmw.w23.services.QueryEngine;
+
 public class App {
     public static void main( String[] args ){
         handleMainMenu();

@@ -1,4 +1,4 @@
-package dal.dmw.w23;
+package dal.dmw.w23.services;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +21,7 @@ public class QueryEngine {
      * Instance of the dbservice class to call the db apis
      */
     DbService dbService;
-    QueryEngine(String username){
+    public QueryEngine(String username){
         dbService = new DbService(username);
     }
 

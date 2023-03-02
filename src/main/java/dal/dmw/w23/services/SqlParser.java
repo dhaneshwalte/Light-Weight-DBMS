@@ -1,4 +1,4 @@
-package dal.dmw.w23;
+package dal.dmw.w23.services;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,9 +1,11 @@
-package dal.dmw.w23;
+package dal.dmw.w23.services;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+
+import dal.dmw.w23.Constants;
 
 /**
  * Class used for logging
