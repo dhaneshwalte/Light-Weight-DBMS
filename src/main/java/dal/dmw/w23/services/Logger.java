@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Date;
 
 import dal.dmw.w23.Constants;
 
@@ -11,6 +12,11 @@ import dal.dmw.w23.Constants;
  * Class used for logging
  */
 public class Logger {
+
+    String username;
+    public Logger(String username){
+        this.username = username;
+    }
 
     /**
      * Logs the message in the log file specified in the constants
@@ -28,7 +34,7 @@ public class Logger {
                 fileWriter = new FileWriter(file, true);
             }
             PrintWriter writer = new PrintWriter(fileWriter);
-            writer.println(logMessage);
+            writer.println(username + " " + new Date().toString() + " " + logMessage);
             writer.close();
         } catch(IOException e){
             e.printStackTrace();

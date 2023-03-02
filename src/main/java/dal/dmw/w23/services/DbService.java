@@ -35,10 +35,10 @@ public class DbService {
 
     private Logger logger;
 
-    public DbService(String dbName) {
-        this.dataDirectory = Constants.databasePath + dbName + "/";
+    public DbService(String username) {
+        this.dataDirectory = Constants.databasePath + username + "/";
         tables = new HashMap<>();
-        logger = new Logger();
+        logger = new Logger(username);
     }
     
     /**
