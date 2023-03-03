@@ -34,7 +34,7 @@ public class Logger {
                 fileWriter = new FileWriter(file, true);
             }
             PrintWriter writer = new PrintWriter(fileWriter);
-            writer.println(username + " " + new Date().toString() + " " + logMessage);
+            writer.println(username + "|" + new Date().toString() + "|" + logMessage);
             writer.close();
         } catch(IOException e){
             e.printStackTrace();
